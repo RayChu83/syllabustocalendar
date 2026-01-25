@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
 export default function Label({
   title,
@@ -21,14 +20,6 @@ export default function Label({
       )}
     >
       {title}
-      {required ? (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="text-red-400"> *</span>
-          </TooltipTrigger>
-          <TooltipContent>Field is required</TooltipContent>
-        </Tooltip>
-      ) : null}
     </label>
   );
 }

@@ -62,12 +62,15 @@ export default function Semesters() {
             Your Semesters:
           </h1>
           <div className="flex flex-wrap items-center gap-4">
-            <button className="text-sm text-emerald-300 outline outline-emerald-700 w-fit cursor-pointer px-4 py-1.5 rounded-full bg-emerald-900 drop-shadow-2xl drop-shadow-emerald-900 flex items-center justify-center gap-2 hover:brightness-110 transition-all duration-300">
+            <Link
+              className="text-sm text-emerald-300 outline outline-emerald-700 w-fit cursor-pointer px-4 py-1.5 rounded-full bg-emerald-900 drop-shadow-2xl drop-shadow-emerald-900 flex items-center justify-center gap-2 hover:brightness-110 transition-all duration-300"
+              href="/semesters/add"
+            >
               <span>📚</span>
               <span className="flex items-center gap-1.5">
                 Add Semester <GoArrowRight />
               </span>
-            </button>
+            </Link>
             <button className="text-sm text-purple-300 outline outline-purple-700 w-fit cursor-pointer px-4 py-1.5 rounded-full bg-purple-900 drop-shadow-2xl drop-shadow-purple-900 flex items-center justify-center gap-2 hover:brightness-110 transition-all duration-300">
               <span>✨</span>
               <span>Powered by Advyna AI</span>

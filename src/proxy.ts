@@ -42,9 +42,10 @@ export async function proxy(request: NextRequest) {
     if (session && (isProtectedRoute || isAuthRoute)) {
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
 
-      if (!user) {
+      if (!user || userError) {
         return NextResponse.redirect(new URL("/sign-in", request.url));
       }
 
@@ -54,9 +55,10 @@ export async function proxy(request: NextRequest) {
         .eq("id", user.id)
         .maybeSingle();
 
-      console.log(profile, profileError);
-
-      if (!profile && !request.nextUrl.pathname.startsWith("/profile/set-up")) {
+      if (
+        (!profile || profileError) &&
+        !request.nextUrl.pathname.startsWith("/profile/set-up")
+      ) {
         return NextResponse.redirect(new URL("/profile/set-up", request.url));
       }
 
