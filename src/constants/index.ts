@@ -50,12 +50,12 @@ export const ClassSyllabusFilesSchema = z
       .instanceof(File)
       .refine(
         (file) => file.size <= MAX_FILE_SIZE,
-        "Each file must be less than 5MB"
+        "Each file must be less than 5MB",
       )
       .refine(
         (file) => isAllowedFileType(file.type),
-        "Your file type is not supported"
-      )
+        "Your file type is not supported",
+      ),
   )
   .min(1, "At least one file is required")
   .max(5, "You can only upload up to 5 files");
@@ -139,3 +139,14 @@ export const defaultSemesters = [
     ],
   },
 ];
+
+export type Semester = {
+  id: string;
+  profile: string;
+  title: string;
+  active: boolean;
+  created_at: Date;
+  from: Date;
+  to: Date;
+  grade: string;
+};

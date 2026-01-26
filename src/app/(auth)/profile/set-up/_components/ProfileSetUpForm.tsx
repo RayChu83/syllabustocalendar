@@ -70,6 +70,7 @@ export default function ProfileSetUpForm() {
     toast.success("Profile was completed");
     router.push("/dashboard");
   };
+
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
       <header>
@@ -86,7 +87,7 @@ export default function ProfileSetUpForm() {
               "bg-zinc-850 text-neutral-300 px-4 py-2 w-full rounded-sm outline-offset-2 transition-all border border-zinc-600 outline-2",
               profileDetails.firstName.error
                 ? "outline-red-400/60"
-                : "outline-transparent focus:outline-zinc-400/60"
+                : "outline-transparent focus:outline-zinc-400/60",
             )}
             id="profile-setup-first-name"
             value={profileDetails.firstName.value}
@@ -114,7 +115,7 @@ export default function ProfileSetUpForm() {
               "bg-zinc-850 text-neutral-300 px-4 py-2 w-full rounded-sm outline-offset-2 transition-all border border-zinc-600 outline-2",
               profileDetails.lastName.error
                 ? "outline-red-400/60"
-                : "outline-transparent focus:outline-zinc-400/60"
+                : "outline-transparent focus:outline-zinc-400/60",
             )}
             id="profile-setup-last-name"
             value={profileDetails.lastName.value}
@@ -147,7 +148,7 @@ export default function ProfileSetUpForm() {
               "bg-zinc-850 text-neutral-300 px-4 py-2 w-full rounded-sm outline-offset-2 transition-all border border-zinc-600 outline-2",
               profileDetails.school.error
                 ? "outline-red-400/60"
-                : "outline-transparent focus:outline-zinc-400/60"
+                : "outline-transparent focus:outline-zinc-400/60",
             )}
             id="profile-setup-school"
             value={profileDetails.school.value}

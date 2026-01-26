@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 
 const initSemesterDetails = {
   title: { value: "", error: "" },
+  grade: { value: "", error: "" },
 };
 
 export default function AddSemesterForm() {
@@ -46,13 +47,19 @@ export default function AddSemesterForm() {
     }
 
     const dateRangeValidated = validateDateRange();
-    if (!dateRangeValidated || !semesterDetails.title.value) return;
+    if (
+      !dateRangeValidated ||
+      !semesterDetails.title.value ||
+      !semesterDetails.grade.value
+    )
+      return;
 
     const { data, error: addSemesterError } = await supabase
       .from("semesters")
       .insert([
         {
           title: semesterDetails.title.value,
+          grade: semesterDetails.grade.value,
           active: true,
           from: dateRange.from,
           to: dateRange.to,
@@ -97,7 +104,7 @@ export default function AddSemesterForm() {
               "bg-zinc-850 text-neutral-300 px-4 py-2 w-full rounded-sm outline-offset-2 transition-all border border-zinc-600 outline-2",
               semesterDetails.title.error
                 ? "outline-red-400/60"
-                : "outline-transparent focus:outline-zinc-400/60"
+                : "outline-transparent focus:outline-zinc-400/60",
             )}
             id="semester-title"
             value={semesterDetails.title.value}
@@ -112,6 +119,34 @@ export default function AddSemesterForm() {
           {semesterDetails.title.error && (
             <p className="text-red-400 text-sm">
               {semesterDetails.title.error}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label required id="semester-grade" title="Semester Grade:" />
+        <div className="w-full space-y-1.5">
+          <input
+            type="text"
+            className={cn(
+              "bg-zinc-850 text-neutral-300 px-4 py-2 w-full rounded-sm outline-offset-2 transition-all border border-zinc-600 outline-2",
+              semesterDetails.grade.error
+                ? "outline-red-400/60"
+                : "outline-transparent focus:outline-zinc-400/60",
+            )}
+            id="semester-grade"
+            value={semesterDetails.grade.value}
+            onChange={(e) =>
+              setSemesterDetails((prev) => ({
+                ...prev,
+                grade: { value: e.target.value, error: "" },
+              }))
+            }
+            placeholder="Lower freshman"
+          />
+          {semesterDetails.grade.error && (
+            <p className="text-red-400 text-sm">
+              {semesterDetails.grade.error}
             </p>
           )}
         </div>
