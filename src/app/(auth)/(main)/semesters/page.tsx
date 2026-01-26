@@ -6,9 +6,8 @@ import SemestersCard from "./_components/SemestersCard";
 import { serverClient } from "@/lib/supabase/server";
 import { defaultSemesters, Semester } from "@/constants";
 
-const supabase = await serverClient();
-
 export default async function Semesters() {
+  const supabase = await serverClient();
   const {
     data: { user },
     error: userError,
