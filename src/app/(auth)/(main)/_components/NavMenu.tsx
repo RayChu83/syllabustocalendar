@@ -10,7 +10,6 @@ import { Tooltip, TooltipContent } from "../../../../components/ui/tooltip";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
 import { GoArrowRight } from "react-icons/go";
 import { cn } from "@/lib/utils";
-import { RainbowButton } from "@/components/ui/rainbow-button";
 import { toast } from "sonner";
 import { supabaseBrowserClient as supabase } from "@/lib/supabase/browser";
 
@@ -45,9 +44,7 @@ export default function NavMenu() {
     <motion.nav>
       <motion.header
         className={`py-4 px-6 flex items-center justify-between gap-8 fixed w-full top-0 z-50 transition-all duration-700 border-b border border-transparent ${
-          scrolled || mobileNavOpen
-            ? " bg-[#18181b]/75 inset-shadow-sm inset-shadow-black/10 backdrop-blur-lg border-zinc-800"
-            : ""
+          scrolled || mobileNavOpen ? "backdrop-blur-lg" : ""
         }`}
       >
         <aside className="flex items-center justify-center gap-8">
@@ -58,7 +55,7 @@ export default function NavMenu() {
               height={36}
               alt="Advyna Logo"
             />
-            <h1 className="font-semibold text-xl text-white">Advyna</h1>
+            <h1 className="font-semibold text-xl text-neutral-700">Advyna</h1>
           </Link>
           <NavLink
             pathname={pathname}
@@ -98,15 +95,15 @@ export default function NavMenu() {
             Classes
           </NavLink>
           <div className="flex items-center gap-4">
-            <RainbowButton
+            <button
               className={cn(
-                "rounded-full hover:brightness-90 text-sm px-3",
-                mobileNavOpen ? "md:opacity-100 opacity-0" : null
+                "rounded-full hover:brightness-90 text-sm px-5 py-2.5 bg-black text-white",
+                mobileNavOpen ? "md:opacity-100 opacity-0" : null,
               )}
               onClick={handleSignOut}
             >
               Sign out
-            </RainbowButton>
+            </button>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
@@ -144,10 +141,10 @@ function MobileNavMenu({
   return (
     <section
       className={cn(
-        "bg-[#18181b]/75 inset-shadow-sm inset-shadow-black/10 backdrop-blur-lg fixed top-17 w-full z-50 flex flex-col items-center justify-between transition-all duration-700 md:-left-full",
-        !mobileNavOpen ? "-left-full" : "left-0"
+        "backdrop-blur-lg fixed top-17 w-full z-50 flex flex-col items-center justify-between transition-all duration-700 md:-left-full",
+        !mobileNavOpen ? "-left-full" : "left-0",
       )}
-      style={{ height: "calc(100dvh - 68px)" }}
+      style={{ height: "calc(100dvh - 74px)" }}
     >
       <div className="flex flex-col items-center justify-between w-full p-4 gap-2">
         <NavLink
@@ -202,12 +199,12 @@ function MobileNavMenu({
         </NavLink>
       </div>
       <div className="p-4 w-full">
-        <RainbowButton
-          className={cn("p-5 rounded-full hover:brightness-90 w-full")}
+        <button
+          className={cn("p-5 rounded-full bg-black w-full text-white")}
           onClick={handleSignOut}
         >
           Sign out
-        </RainbowButton>
+        </button>
       </div>
     </section>
   );

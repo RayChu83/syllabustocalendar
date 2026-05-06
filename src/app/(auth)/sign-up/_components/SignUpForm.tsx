@@ -1,6 +1,5 @@
 "use client";
 import Label from "@/components/ui/Label";
-import { RainbowButton } from "@/components/ui/rainbow-button";
 import { EmailSchema, PasswordSchema } from "@/constants";
 import { supabaseBrowserClient as supabase } from "@/lib/supabase/browser";
 import { cn } from "@/lib/utils";
@@ -66,12 +65,12 @@ export default function SignUpForm() {
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
       <header>
-        <h1 className="text-2xl font-bold tracking-wide text-neutral-200">
+        <h1 className="text-2xl font-bold tracking-wide text-neutral-700">
           Sign up
         </h1>
         <p className="text-neutral-400 text-lg">
           Already have an account?{" "}
-          <Link href="/sign-in" className="text-blue-300 underline">
+          <Link href="/sign-in" className="text-blue-400 underline">
             Sign In
           </Link>
         </p>
@@ -82,10 +81,10 @@ export default function SignUpForm() {
           <input
             type="text"
             className={cn(
-              "bg-zinc-850 text-neutral-300 px-4 py-2 w-full rounded-sm outline-offset-2 transition-all border border-zinc-600 outline-2",
+              "text-sm bg-neutral-100 text-neutral-500 px-4 py-2 w-full rounded-sm outline-offset-2 transition-all border outline-2",
               signUpDetails.email.error
                 ? "outline-red-400/60"
-                : "outline-transparent focus:outline-zinc-400/60"
+                : "outline-transparent focus:outline-neutral-400/60",
             )}
             id="sign-up-email"
             value={signUpDetails.email.value}
@@ -108,10 +107,10 @@ export default function SignUpForm() {
           <input
             type="password"
             className={cn(
-              "bg-zinc-850 text-neutral-300 px-4 py-2 w-full rounded-sm outline-offset-2 transition-all border border-zinc-600 outline-2",
+              "text-sm bg-neutral-100 text-neutral-500 px-4 py-2 w-full rounded-sm outline-offset-2 transition-all border outline-2",
               signUpDetails.password.error
                 ? "outline-red-400/60"
-                : "outline-transparent focus:outline-zinc-400/60"
+                : "outline-transparent focus:outline-neutral-400/60",
             )}
             id="sign-up-password"
             value={signUpDetails.password.value}
@@ -131,18 +130,15 @@ export default function SignUpForm() {
         </div>
       </div>
       <div className="flex items-center justify-between">
-        <aside className="space-x-4 flex">
+        <aside className="gap-2 flex">
           <button
-            className="py-2 px-3 rounded-md bg-zinc-850 outline outline-zinc-700 cursor-pointer hover:brightness-110 transition-all"
+            className="text-sm py-2.5 px-5 rounded-md bg-neutral-100 cursor-pointer hover:brightness-110 transition-all"
             type="button"
             onClick={handleReset}
           >
             Reset
           </button>
-          <RainbowButton
-            variant="default"
-            className="disabled:animate-none disabled:pointer-events-none text-base py-4.5 px-3 hover:brightness-90 font-normal flex items-center gap-3"
-          >
+          <button className="text-sm disabled:animate-none disabled:pointer-events-none py-2.5 px-5  hover:brightness-90 font-normal flex items-center gap-3">
             <span>Sign up</span>
             {/* <div role="status">
           <svg
@@ -163,7 +159,7 @@ export default function SignUpForm() {
           </svg>
           <span className="sr-only">Loading...</span>
         </div> */}
-          </RainbowButton>
+          </button>
         </aside>
       </div>
     </form>

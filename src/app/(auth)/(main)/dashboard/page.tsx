@@ -8,7 +8,7 @@ export default function Dashboard() {
   // undefined = still loading, null = no session, object = logged in
   if (session === undefined) {
     return (
-      <main className="mt-17 flex flex-col gap-10 max-w-480 mx-auto p-6">
+      <main className="mt-17 flex flex-col gap-10 max-w-400 mx-auto p-6">
         <div>Loading session...</div>
       </main>
     );
@@ -16,14 +16,14 @@ export default function Dashboard() {
 
   if (session === null) {
     return (
-      <main className="mt-17 flex flex-col gap-10 max-w-480 mx-auto p-6">
+      <main className="mt-17 flex flex-col gap-10 max-w-400 mx-auto p-6">
         <div>Not logged in</div>
       </main>
     );
   }
 
   return (
-    <main className="mt-17 flex flex-col gap-10 max-w-480 mx-auto p-6">
+    <main className="mt-17 flex flex-col gap-10 max-w-400 mx-auto p-6">
       <h1>Dashboard</h1>
       <div>Welcome, {session.user.email}</div>
       <pre>{JSON.stringify(session.user, null, 2)}</pre>

@@ -1,5 +1,4 @@
 "use client";
-import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -29,13 +28,15 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Semester } from "@/constants";
+import { SemesterWithClasses } from "@/constants";
+import { useRouter } from "next/navigation";
 
 export default function SemestersCard({
   semesters,
 }: {
-  semesters: Semester[];
+  semesters: SemesterWithClasses[];
 }) {
+  const router = useRouter();
   async function copyToClipboard(text: string) {
     try {
       // Use the modern Clipboard API
@@ -49,25 +50,22 @@ export default function SemestersCard({
 
   return semesters.map((semester, i) => (
     <section
-      className="w-full bg-zinc-850 hover:bg-zinc-800 rounded-md p-4 group transition-all duration-300  hover:scale-[1.02] ease-in-out border-b-2 border-r-2 border-zinc-600"
+      className="w-full bg-neutral-100 rounded-md p-6 transition-all duration-300 hover:scale-[1.02] ease-in-out"
       key={i}
     >
       <header className="flex items-center justify-between mb-4">
-        <aside>
-          <Link
-            className="text-2xl font-bold text-neutral-200 block underline decoration-[0.5px] decoration-transparent group-hover:decoration-neutral-200 underline-offset-4 transition-all "
-            href={`/semesters/${semester.id}`}
-          >
+        <Link href={`/semesters/${semester.id}`}>
+          <h3 className="text-xl font-medium text-neutral-500 block">
             {semester.title}
-          </Link>
-          <AnimatedShinyText className="text-neutral-400" shimmerWidth={200}>
-            <span className="text-sm font-medium">{semester.grade}</span>
-          </AnimatedShinyText>
-        </aside>
+          </h3>
+          <p className="text-neutral-400 text-sm font-medium">
+            {semester.semester}
+          </p>
+        </Link>
         <aside className="flex items-center gap-6">
           <Dialog>
             <DialogTrigger asChild>
-              <button className="text-2xl cursor-pointer transition-all border-none text-neutral-200 outline-0">
+              <button className="text-2xl cursor-pointer transition-all border-none text-neutral-500 outline-0">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="inline-flex">
@@ -87,14 +85,14 @@ export default function SemestersCard({
               </DialogHeader>
               <input
                 type="text"
-                className="bg-zinc-850 text-neutral-300 px-4 py-2 w-full rounded-sm outline-offset-2 transition-all border border-zinc-600 outline-2 outline-transparent focus:outline-zinc-400/60"
+                className="bg-neutral-100 text-neutral-500 px-4 py-2 w-full rounded-sm transition-all"
                 defaultValue={`http://localhost:3000/semesters/${semester.id}`}
                 disabled
                 readOnly
               />
               <DialogFooter className="flex flex-row items-center gap-4">
                 <button
-                  className="w-fit py-2 px-4 rounded-sm bg-neutral-300 text-black cursor-pointer"
+                  className="w-fit py-2 px-4 rounded-sm bg-neutral-100 text-neutral-500 cursor-pointer"
                   onClick={() => {
                     copyToClipboard(
                       `http://localhost:3000/semesters/${semester.id}`,
@@ -104,7 +102,7 @@ export default function SemestersCard({
                   Copy
                 </button>
                 <DialogClose asChild>
-                  <button className="w-fit py-2 px-4 rounded-sm bg-zinc-850 text-neutral-300 cursor-pointer">
+                  <button className="w-fit py-2 px-4 rounded-sm bg-black text-white cursor-pointer">
                     Close
                   </button>
                 </DialogClose>
@@ -113,7 +111,7 @@ export default function SemestersCard({
           </Dialog>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex text-2xl cursor-pointer transition-all border-none text-neutral-200 outline-0">
+              <button className="flex text-2xl cursor-pointer transition-all border-none text-neutral-500 outline-0">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="inline-flex">
@@ -124,25 +122,21 @@ export default function SemestersCard({
                 </Tooltip>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-zinc-850 outline-zinc-600">
-              <DropdownMenuLabel className="font-semibold tracking-tight text-neutral-300">
+            <DropdownMenuContent>
+              <DropdownMenuLabel className="font-semibold tracking-tight text-neutral-400">
                 Settings
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <button className="w-full text-neutral-300 hover:bg-zinc-800! transition-all cursor-pointer flex items-center justify-between group">
-                  <span className="group-hover:text-yellow-400 transition-all">
-                    Edit
-                  </span>
-                  <MdEdit className="group-hover:text-yellow-400 transition-all" />
+                <button className="w-full text-neutral-400 transition-all cursor-pointer flex items-center justify-between group">
+                  <span>Edit</span>
+                  <MdEdit />
                 </button>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <button className="w-full text-neutral-300 hover:bg-zinc-800! transition-all cursor-pointer flex items-center justify-between group">
-                  <span className="group-hover:text-red-400 transition-all">
-                    Delete
-                  </span>
-                  <MdDelete className="group-hover:text-red-400 transition-all" />
+                <button className="w-full text-neutral-400 transition-all cursor-pointer flex items-center justify-between group">
+                  <span>Delete</span>
+                  <MdDelete />
                 </button>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -150,25 +144,34 @@ export default function SemestersCard({
         </aside>
       </header>
       <div className="flex flex-col gap-2">
-        {/* {semester.classes.map((cls, j) => (
+        {semester.classes.map((cls, j) => (
           <Link
             key={j}
             className={cn(
               "flex items-center justify-between gap-2 text-sm py-1.5 px-3 rounded-sm font-light tracking-wide cursor-pointer transition-all",
               [
-                "bg-red-500/10 text-red-300 hover:bg-red-500/20",
-                "bg-orange-500/10 text-orange-300 hover:bg-orange-500/20",
-                "bg-yellow-500/10 text-yellow-300 hover:bg-yellow-500/20",
-                "bg-green-500/10 text-green-300 hover:bg-green-500/20",
-                "bg-blue-500/10 text-blue-300 hover:bg-blue-500/20",
+                "bg-red-50 text-red-500 hover:bg-red-100",
+                "bg-orange-50 text-orange-500 hover:bg-orange-bg-red-100",
+                "bg-yellow-50 text-yellow-500 hover:bg-yellow-bg-red-100",
+                "bg-green-50 text-green-500 hover:bg-green-bg-red-100",
+                "bg-blue-50 text-blue-500 hover:bg-blue-bg-red-100",
               ][j % 5],
             )}
-            href={`/semesters/${semester.id}/${cls}`}
+            href={`/semesters/${semester.id}/classes/${cls.id}`}
           >
-            <span>{cls}</span>
+            <span className="text-start line-clamp-1">{cls.title}</span>
             <GoArrowRight className="text-lg" />
           </Link>
-        ))} */}
+        ))}
+        <Link
+          className={cn(
+            "flex items-center justify-between gap-2 text-sm py-1.5 px-3 rounded-sm font-light tracking-wide cursor-pointer transition-all bg-white",
+          )}
+          href={`/semesters/${semester.id}/classes/create`}
+        >
+          <span className="text-start">Add new class</span>
+          <GoArrowRight className="text-lg" />
+        </Link>
       </div>
     </section>
   ));

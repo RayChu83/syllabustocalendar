@@ -14,10 +14,7 @@ export default function Label({
   return (
     <label
       htmlFor={id}
-      className={cn(
-        "font-medium tracking-wide text-lg text-neutral-300",
-        labelClass
-      )}
+      className={cn("tracking-tight text-neutral-400", labelClass)}
     >
       {title}
     </label>

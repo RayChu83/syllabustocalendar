@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     if (!bodyParsed.success) {
       return NextResponse.json(
         { error: "Request body was invalid" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,14 +29,14 @@ export async function POST(request: Request) {
       // file size > 5MB
       return NextResponse.json(
         { error: "File size was too large" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!isAllowedFileType(contentType)) {
       // File type validation on MME types
       return NextResponse.json(
         { error: "File type is not supported" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -51,18 +51,19 @@ export async function POST(request: Request) {
 
     // If error throw error
     if (error) {
+      console.log(error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     // Return url with file path
     return NextResponse.json(
       { url: data.signedUrl, filePath },
-      { status: 200 }
+      { status: 200 },
     );
   } catch {
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -83,7 +84,7 @@ export async function DELETE(request: Request) {
       // if failed parsed, return error code 400, body invalid
       return NextResponse.json(
         { error: "Request body was invalid" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -99,7 +100,7 @@ export async function DELETE(request: Request) {
   } catch {
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

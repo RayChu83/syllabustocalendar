@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import { Figtree, Manrope, Quicksand } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 
-const manropeFont = Manrope({ subsets: ["latin"] });
+const quicksandFont = Quicksand();
+const manropeFont = Manrope();
 
 export const metadata: Metadata = {
-  title: "Advyna",
+  title: "Syllabus To Calendar",
   // include description later
   icons: {
     icon: [
@@ -24,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body className={`${manropeFont.className}`} id="portal-root">
         {children}
         <Toaster position="bottom-right" closeButton />

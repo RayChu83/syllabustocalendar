@@ -22,8 +22,8 @@ export default function NavLink({
         "text-sm transition-all duration-300 tracking-wider text-nowrap outline-none font-light",
         className,
         pathname === href
-          ? "text-zinc-200 font-medium"
-          : "animated-underline text-zinc-400 hover:text-zinc-300"
+          ? "text-neutral-700"
+          : "animated-underline text-zinc-500 hover:text-zinc-400",
       )}
       onClick={onClick ? onClick : undefined}
     >
