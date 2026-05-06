@@ -549,7 +549,10 @@ export default async function SemesterDetailed({
 
   const { data: classesData, error: classesDataError } = await supabase
     .from("classes")
-    .select("*");
+    .select("*")
+    .eq("semester_id", semesterId);
+
+  console.log(classesData);
 
   if (classesDataError) throw Error(classesDataError.message);
 

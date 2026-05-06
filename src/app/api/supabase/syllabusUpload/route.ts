@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import z from "zod";
 import { v4 as uuidv4 } from "uuid";
-import { isAllowedFileType, MAX_FILE_SIZE } from "@/constants";
 import { serverClient } from "@/lib/supabase/server";
+import { isAllowedFileType, MAX_FILE_SIZE } from "@/constants/schemas";
 
 const uploadRequestSchema = z.object({
   fileName: z.string(),
