@@ -27,8 +27,6 @@ export default async function Class({
     .eq("semester_id", semesterId)
     .single();
 
-  console.log(classData);
-
   if (!classData || classError) {
     throw Error("Failed to retrieve class details");
   }

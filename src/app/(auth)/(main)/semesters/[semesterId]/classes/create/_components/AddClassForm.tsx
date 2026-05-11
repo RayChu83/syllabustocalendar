@@ -22,6 +22,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useRouter } from "next/navigation";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.mjs",
@@ -40,6 +41,7 @@ export default function AddClassForm({ semesterId }: { semesterId: string }) {
   >("idle");
   const [syllabusJSONDraft, setSyllabusJSONDraft] =
     useState<SyllabusJSON | null>(null);
+  const [syllabusRecordId, setSyllabusRecordId] = useState<number | null>(null);
 
   // placeholder to prevent TS errors (no functional change)
   const [classDetailErrors, setClassDetailErrors] = useState<
@@ -47,6 +49,7 @@ export default function AddClassForm({ semesterId }: { semesterId: string }) {
   >({});
   const [numPages, setNumPages] = useState<number>();
   const [pageNumber, setPageNumber] = useState<number>(1);
+  const router = useRouter();
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
     setNumPages(numPages);
@@ -100,12 +103,92 @@ export default function AddClassForm({ semesterId }: { semesterId: string }) {
     return data.text;
   }
 
+  async function createSyllabusRecord(
+    syllabusText: string,
+    hash: string,
+    syllabusJSON: SyllabusJSON,
+  ) {
+    const filePath = syllabusType === "file" ? await uploadSyllabus() : null;
+
+    console.log("SYLLABUS FILE PATH", filePath);
+
+    if (syllabusType === "file" && !filePath) {
+      toast.error("Failed to upload syllabus file");
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from("syllabus")
+      .insert({
+        raw_text: syllabusText,
+        file_hash: hash,
+        parsed_data: syllabusJSON,
+        key: filePath,
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      toast.error("Failed to save syllabus details", {
+        description: error.message,
+      });
+      return null;
+    }
+
+    return data.id as number;
+  }
+
+  async function parseSyllabusJson(syllabusText: string, hash: string) {
+    const syllabusJSONRes = await fetch("/api/ai/testSyllabi", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ syllabusText }),
+    });
+
+    if (!syllabusJSONRes.ok) {
+      const data = await syllabusJSONRes.json().catch(() => null);
+      toast.error(data?.error || "Failed to parse syllabus");
+      return null;
+    }
+
+    const syllabusJSON: SyllabusJSON = await syllabusJSONRes.json();
+
+    const parsedSyllabusJSON = syllabusSchema.safeParse(syllabusJSON);
+
+    if (syllabusJSON.ok && parsedSyllabusJSON.success) {
+      const recordId = await createSyllabusRecord(
+        syllabusText,
+        hash,
+        parsedSyllabusJSON.data,
+      );
+
+      if (!recordId) {
+        return null;
+      }
+
+      setSyllabusRecordId(recordId);
+      setStatus("draft");
+      setSyllabusJSONDraft(parsedSyllabusJSON.data);
+      return parsedSyllabusJSON.data;
+    }
+
+    if (!parsedSyllabusJSON.success) {
+      console.error("Syllabus schema validation failed", {
+        issues: parsedSyllabusJSON.error.issues,
+        syllabusJSON,
+      });
+    }
+
+    toast.error("Syllabus failed to parse correctly");
+    return null;
+  }
+
   async function uploadSyllabus() {
     const file = syllabus.file;
-    if (!file || !syllabusFileSchema.safeParse(file).success) {
-      return;
+    if (!file || !syllabusFileSchema.safeParse(file.value).success) {
+      return null;
     }
-    const preSignedUrlRes = await fetch("/api/supabase/syllabusUpload", {
+    const preSignedUrlRes = await fetch("/api/supabase/syllabusFileUpload", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -153,6 +236,7 @@ export default function AddClassForm({ semesterId }: { semesterId: string }) {
           }
         : prev.file,
     }));
+    return filePath;
   }
 
   const parseSyllabus = async () => {
@@ -166,6 +250,11 @@ export default function AddClassForm({ semesterId }: { semesterId: string }) {
         const existingSyllabus = await checkSyllabusExists(hash);
         if (existingSyllabus) {
           // Syllabus already exists
+          toast.info("This syllabus has already been uploaded.");
+          setSyllabusRecordId(existingSyllabus.id);
+          setSyllabusJSONDraft(existingSyllabus.parsed_data as SyllabusJSON);
+          setStatus("draft");
+          return existingSyllabus.parsed_data as SyllabusJSON;
         } else {
           // Upload new syllabus
           const syllabusText = await parseSyllabusText(file.value);
@@ -174,28 +263,7 @@ export default function AddClassForm({ semesterId }: { semesterId: string }) {
             toast.error("Invalid syllabus text format");
             return null;
           }
-          const syllabusJSONRes = await fetch("/api/ai/testSyllabi", {
-            method: "GET",
-            // body: JSON.stringify({ syllabusText }),
-          });
-          if (!syllabusJSONRes.ok) {
-            toast.error("Failed to parse syllabus");
-            return null;
-          }
-          const syllabusJSON: SyllabusJSON = (await syllabusJSONRes.json())
-            ?.details;
-          // safe parse the parsed syllabus
-          // if okay, store it in state and mark status as draft
-          if (
-            syllabusJSON.ok &&
-            syllabusSchema.safeParse(syllabusJSON).success
-          ) {
-            setStatus("draft");
-            setSyllabusJSONDraft(syllabusJSON as SyllabusJSON);
-          } else {
-            toast.error("Syllabus failed to parse correctly");
-            return null;
-          }
+          return await parseSyllabusJson(syllabusText, hash);
         }
       } else {
         // Handle text syllabus upload
@@ -210,8 +278,13 @@ export default function AddClassForm({ semesterId }: { semesterId: string }) {
         const existingSyllabus = await checkSyllabusExists(hash);
         if (existingSyllabus) {
           // Syllabus already exists
+          toast.info("This syllabus has already been uploaded.");
+          setSyllabusRecordId(existingSyllabus.id);
+          setSyllabusJSONDraft(existingSyllabus.parsed_data as SyllabusJSON);
+          setStatus("draft");
+          return existingSyllabus.parsed_data as SyllabusJSON;
         } else {
-          // Upload new syllabus
+          return await parseSyllabusJson(syllabus.text, hash);
         }
       }
     } catch (err) {
@@ -257,20 +330,38 @@ export default function AddClassForm({ semesterId }: { semesterId: string }) {
     }
 
     try {
+      setStatus("parsing");
       // Parse syllabus
-      await parseSyllabus();
+      const parsedSyllabus = await parseSyllabus();
+      if (!parsedSyllabus) {
+        setStatus("idle");
+      }
     } catch {
       toast.error("An unknown error occurred");
+      setStatus("idle");
     }
   };
 
   const handleDraftSubmission = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await fetch("/api/supabase/test-rpc", {
+    if (!syllabusRecordId) {
+      toast.error("No saved syllabus record was found.");
+      return;
+    }
+
+    const response = await fetch("/api/supabase/createClass", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ body: syllabusJSONDraft, semesterId }),
+      body: JSON.stringify({
+        body: syllabusJSONDraft,
+        semesterId,
+        syllabusId: syllabusRecordId,
+      }),
     });
+    if (response.ok) {
+      toast.success("Class created successfully!");
+      router.push(`/semesters/${semesterId}`);
+    }
   };
 
   return (
@@ -362,6 +453,32 @@ export default function AddClassForm({ semesterId }: { semesterId: string }) {
                   </button>
                 </div>
               </>
+            );
+
+          case "parsing":
+            return (
+              <section
+                className="flex min-h-72 flex-col items-center justify-center gap-5 rounded-3xl border border-blue-100 bg-blue-50/60 px-8 py-12 text-center"
+                aria-live="polite"
+                aria-busy="true"
+              >
+                <div
+                  role="status"
+                  className="size-12 animate-spin rounded-full border-4 border-blue-100 border-t-blue-500"
+                >
+                  <span className="sr-only">Loading...</span>
+                </div>
+                <div className="space-y-1">
+                  <h2 className="text-xl font-semibold tracking-tight text-neutral-700">
+                    Reading your syllabus
+                  </h2>
+                  <p className="max-w-md text-sm text-neutral-500">
+                    The OpenAI parser is extracting class details, schedules,
+                    instructors, and deadlines. This can take a minute for long
+                    syllabi.
+                  </p>
+                </div>
+              </section>
             );
 
           case "draft":
@@ -736,7 +853,7 @@ export default function AddClassForm({ semesterId }: { semesterId: string }) {
                           </ul>
                         </div>
                         {syllabusJSONDraft.class.other.map(
-                          ({ title, description }, index) => (
+                          ({ title }, index) => (
                             <div key={index}>
                               <label
                                 htmlFor={`class-${index}`}

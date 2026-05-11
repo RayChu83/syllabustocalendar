@@ -1,9 +1,15 @@
 "use client";
 import { useSession } from "@/app/_context/AuthContext";
 import Label from "@/components/ui/Label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import React, { FormEvent, useState } from "react";
-import { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 import { supabaseBrowserClient as supabase } from "@/lib/supabase/browser";
 import { useRouter } from "next/navigation";
@@ -13,6 +19,16 @@ const initSemesterDetails = {
   semester: { value: "", error: "" },
   grade: { value: "", error: "" },
 };
+
+const academicLevels = [
+  "High school",
+  "Freshman",
+  "Sophomore",
+  "Junior",
+  "Senior",
+  "Master's student",
+  "Doctoral student",
+] as const;
 
 export default function AddSemesterForm() {
   const session = useSession();
@@ -118,26 +134,34 @@ export default function AddSemesterForm() {
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        <Label required id="semester-grade" title="Semester Grade:" />
+        <Label required id="semester-grade" title="Academic level:" />
         <div className="w-full space-y-1.5">
-          <input
-            type="text"
-            className={cn(
-              "bg-neutral-100 text-neutral-400 px-4 py-2 w-full rounded-sm outline-offset-2 transition-all border outline-2",
-              semesterDetails.grade.error
-                ? "outline-red-400/60"
-                : "outline-transparent focus:outline-zinc-400/60",
-            )}
-            id="semester-grade"
+          <Select
             value={semesterDetails.grade.value}
-            onChange={(e) =>
+            onValueChange={(value) =>
               setSemesterDetails((prev) => ({
                 ...prev,
-                grade: { value: e.target.value, error: "" },
+                grade: { value, error: "" },
               }))
             }
-            placeholder="Lower freshman"
-          />
+          >
+            <SelectTrigger
+              className={cn(
+                semesterDetails.grade.error
+                  ? "outline-red-400/60"
+                  : "outline-transparent focus-visible:ring-zinc-400/20",
+              )}
+            >
+              <SelectValue placeholder="Select a grade level" />
+            </SelectTrigger>
+            <SelectContent>
+              {academicLevels.map((grade) => (
+                <SelectItem key={grade} value={grade}>
+                  {grade}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {semesterDetails.grade.error && (
             <p className="text-red-400 text-sm">
               {semesterDetails.grade.error}

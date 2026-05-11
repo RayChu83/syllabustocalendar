@@ -4,11 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   const supabase = await serverClient();
 
-  const { body, semesterId } = await req.json();
+  const { body, semesterId, syllabusId } = await req.json();
 
   const { data, error } = await supabase.rpc("create_full_class", {
     payload: body, // ✅ pass the object directly, no JSON.stringify
     semester_id: semesterId,
+    syllabus_id: syllabusId,
   });
 
   if (error) {

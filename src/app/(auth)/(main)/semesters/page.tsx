@@ -3,6 +3,7 @@ import Link from "next/link";
 import SemestersCard from "./_components/SemestersCard";
 import { serverClient } from "@/lib/supabase/server";
 import { SemesterWithClasses } from "@/constants";
+import { IoMdAdd } from "react-icons/io";
 
 export default async function Semesters() {
   const supabase = await serverClient();
@@ -27,8 +28,6 @@ export default async function Semesters() {
 
   if (semestersDataError) throw Error(semestersDataError.message);
 
-  console.log(JSON.stringify(semesters));
-
   return (
     <>
       <main className="mt-17 flex flex-col gap-2 max-w-400 mx-auto p-6">
@@ -43,15 +42,10 @@ export default async function Semesters() {
             Your Semesters:
           </h1>
           <div className="flex flex-wrap items-center gap-4">
-            <Link
-              className="text-sm text-emerald-700 outline outline-emerald-200 w-fit cursor-pointer px-4 py-1.5 rounded-full bg-emerald-100 drop-shadow-2xl drop-shadow-emerald-100 flex items-center justify-center gap-2 hover:brightness-95 transition-all duration-300"
-              href="/semesters/add"
-            >
+            <div className="text-sm text-emerald-700 outline outline-emerald-200 w-fit px-4 py-1.5 rounded-full bg-emerald-100 drop-shadow-2xl drop-shadow-emerald-100 flex items-center justify-center gap-1.5 hover:brightness-95 transition-all duration-300">
               <span>📚</span>
-              <span className="flex items-center gap-1.5">
-                Add Semester <GoArrowRight />
-              </span>
-            </Link>
+              {semesters.length} semesters
+            </div>
             <button className="text-sm text-purple-700 outline outline-purple-200 w-fit cursor-pointer px-4 py-1.5 rounded-full bg-purple-100 drop-shadow-2xl drop-shadow-purple-100 flex items-center justify-center gap-2 hover:brightness-95 transition-all duration-300">
               <span>✨</span>
               <span>Powered by Advyna AI</span>
@@ -60,6 +54,12 @@ export default async function Semesters() {
         </header>
         <div className="grid 2xl:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-6">
           <SemestersCard semesters={semesters} />
+          <Link href="/semesters/add">
+            <div className="text-sm text-blue-500 w-full h-full outline-1 outline-dashed outline-blue-300 p-6 rounded-2xl bg-blue-100 flex flex-col items-center justify-center gap-2 hover:brightness-95 transition-all duration-300">
+              <IoMdAdd className="text-6xl" />
+              <span>New Semester</span>
+            </div>
+          </Link>
         </div>
       </main>
     </>

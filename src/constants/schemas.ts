@@ -48,40 +48,48 @@ const noteSchema = z.object({
   description: z.string(),
 });
 
+const timeSchema = z
+  .string()
+  .regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:MM)")
+  .or(z.literal(""));
+
+const dateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")
+  .or(z.literal(""));
+
 const officeHourSchema = z.object({
   location: z.string(),
-  startTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:MM)"),
-  endTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format (HH:MM)"),
+  startTime: timeSchema,
+  endTime: timeSchema,
   meetingDays: z.array(z.enum(["MO", "TU", "WE", "TH", "FR", "SA", "SU"])),
   additionalNotes: z.array(noteSchema),
 });
 
 const instructorSchema = z.object({
   name: z.string(),
-  email: z.array(z.string().email()),
+  email: z.array(z.string().email().or(z.literal(""))),
   role: z.string(),
   officeHours: z.array(officeHourSchema),
 });
 
 const gradingItemSchema = z.object({
   type: z.string(),
-  weight: z.number(),
+  weight: z.coerce.number(),
 });
 
 const scheduleItemSchema = z.object({
   location: z.string(),
-  startTime: z.string().regex(/^\d{2}:\d{2}$/),
-  endTime: z.string().regex(/^\d{2}:\d{2}$/),
+  startTime: timeSchema,
+  endTime: timeSchema,
   meetingDays: z.array(z.enum(["MO", "TU", "WE", "TH", "FR", "SA", "SU"])),
   additionalNotes: z.array(noteSchema),
 });
 
 const deadlineSchema = z.object({
   title: z.string(),
-  dueDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
-  dueTime: z.string().optional(), // can be empty string
+  dueDate: dateSchema,
+  dueTime: timeSchema.optional(), // can be empty string
 });
 
 const otherItemSchema = z.object({
@@ -96,8 +104,8 @@ export const syllabusSchema = z.object({
     overview: z.string(),
     materials: z.array(z.string()),
     grading: z.array(gradingItemSchema),
-    startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-    endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    startDate: dateSchema,
+    endDate: dateSchema,
     other: z.array(otherItemSchema),
   }),
   instructors: z.array(instructorSchema),
