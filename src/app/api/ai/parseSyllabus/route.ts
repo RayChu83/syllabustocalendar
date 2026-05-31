@@ -33,8 +33,10 @@ export async function POST(req: NextRequest) {
               - It is okay to summarize long text fields concisely while preserving key meaning
               - Do not use ellipses (...) to shorten text
               - If any of the fields are empty, still include them in the output with empty string "" or empty array [] as value
+              - For any missing dates, please use null as the value instead of an empty string
               - Assume titles to be less than 1 sentence and descriptions to be 2-3 sentences max
               - Please do not use/assume any information outside the syllabus text provided
+              - Please assume all years to be in the current year: ${new Date().getFullYear()}
                 `,
         },
         {
@@ -50,8 +52,8 @@ export async function POST(req: NextRequest) {
                       overview: string, (A brief summary of the course content and objectives.)
                       materials: string[], (A string list of required textbooks, software, or other materials needed for the course)
                       grading: { type: string, weight: number }[], (A breakdown of grading components, e.g. [{ type: "Homework", weight: 30 }, { type: "Midterm Exam", weight: 30 }, { type: "Final Exam", weight: 40 }])
-                      startDate : string, (Extract semester start date into "YYYY-MM-DD" format. If not explicitly listed, infer it is the very first date mentioned e.g. 2023-08-23)
-                      endDate : string, (Extract semester end date into "YYYY-MM-DD" format. If not explicitly listed, infer it is the very last date mentioned e.g. 2023-12-15)
+                      startDate : string, (Extract semester start date into "YYYY-MM-DD" format. If not explicitly listed, infer it is the very first date mentioned e.g. 2026-08-23)
+                      endDate : string, (Extract semester end date into "YYYY-MM-DD" format. If not explicitly listed, infer it is the very last date mentioned e.g. 2026-12-15)
                       other: { title: string, description: string }[], (A fallback array for any important class information that doesn't fit into the above fields. Each item should have a concise title and a brief summarized description.)
                   },
                   instructors: {
@@ -75,7 +77,7 @@ export async function POST(req: NextRequest) {
                   }[], (In the case of different lecture and discussion times, have multiple schedule objects in the array.)
                   deadlines: {
                       title: string, (e.g. Essay 1, Midterm Exam 1, Project 1)
-                      dueDate: string, (Extract deadline date into "YYYY-MM-DD" format. If the year is not specified, infer it from the syllabus term if possible. e.g. 2023-10-15)
+                      dueDate: string, (Extract deadline date into "YYYY-MM-DD" format. If the year is not specified, infer it from the syllabus term if possible. e.g. 2026-10-15)
                       dueTime : string, (Extract deadline time into 24-hour format "HH:mm", e.g. "4:00 PM" → "16:00")
                   }[], (An array of every deadline including homeworks, projects, exams. Each deadline must be a separate object in the array.)
                   ok : boolean, (e.g. if the syllabus provided does not contain any sufficient information or is not a syllabus at all, set ok: false)

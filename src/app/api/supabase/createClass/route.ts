@@ -5,6 +5,7 @@ export async function POST(req: NextRequest) {
   const supabase = await serverClient();
 
   const { body, semesterId, syllabusId } = await req.json();
+  console.log(body, semesterId, syllabusId);
 
   const { data, error } = await supabase.rpc("create_full_class", {
     payload: body, // ✅ pass the object directly, no JSON.stringify
