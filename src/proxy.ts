@@ -27,26 +27,22 @@ export async function proxy(request: NextRequest) {
     const isProtectedRoute = protectedRoutes.some((route) =>
       request.nextUrl.pathname.startsWith(route)
     );
+    const isHomeRoute = request.nextUrl.pathname === "/";
 
     // Redirect to login if accessing protected route without session
     if (isProtectedRoute && !session) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
 
-    // Redirect to dashboard if accessing auth pages while logged in
-    const authRoutes = ["/sign-in", "/sign-up"];
-    const isAuthRoute = authRoutes.some((route) =>
-      request.nextUrl.pathname.startsWith(route)
-    );
-
-    if (session && (isProtectedRoute || isAuthRoute)) {
+    // Redirect logged-in users away from the login page and ensure profiles exist.
+    if (session && (isProtectedRoute || isHomeRoute)) {
       const {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser();
 
       if (!user || userError) {
-        return NextResponse.redirect(new URL("/sign-in", request.url));
+        return NextResponse.redirect(new URL("/", request.url));
       }
 
       const { data: profile, error: profileError } = await supabase
@@ -65,10 +61,14 @@ export async function proxy(request: NextRequest) {
       if (profile && request.nextUrl.pathname.startsWith("/profile/set-up")) {
         return NextResponse.redirect(new URL("/profile", request.url));
       }
+
+      if (profile && isHomeRoute) {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
     }
 
     return response;
-  } catch (e) {
+  } catch {
     // Handle any errors
     return NextResponse.next();
   }

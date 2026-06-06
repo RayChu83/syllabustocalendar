@@ -3,7 +3,7 @@
 import { supabaseBrowserClient as supabase } from "@/lib/supabase/browser";
 import { createContext, useContext, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { redirect, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const SessionContext = createContext<Session | null | undefined>(undefined);
 
@@ -14,6 +14,7 @@ export const SessionProvider = ({
 }) => {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const pathName = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     let mounted = true;
@@ -29,7 +30,7 @@ export const SessionProvider = ({
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, newSession) => {
         setSession(newSession);
-      }
+      },
     );
 
     return () => {
@@ -39,14 +40,10 @@ export const SessionProvider = ({
   }, []);
 
   useEffect(() => {
-    if (
-      session === null &&
-      !pathName.startsWith("/sign-in") &&
-      !pathName.startsWith("/sign-up")
-    ) {
-      redirect("/sign-in");
+    if (session === null && pathName !== "/") {
+      router.replace("/");
     }
-  }, [session, pathName]);
+  }, [session, pathName, router]);
 
   return (
     <SessionContext.Provider value={session}>
