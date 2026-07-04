@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import CalendarConnectErrorToast from "@/app/(auth)/(main)/calendar/_components/CalendarConnectErrorToast";
 import GoogleCalendarConnectButton from "@/app/(auth)/(main)/calendar/_components/GoogleCalendarConnectButton";
 import { getValidatedGoogleCalendarConnection } from "@/lib/google-oauth-tokens";
 import { serverClient } from "@/lib/supabase/server";
@@ -153,8 +154,13 @@ export default function SyncPage({
   params: Promise<{ semesterId: string; classId: string }>;
 }) {
   return (
-    <Suspense fallback={<SyncFallback />}>
-      <SyncReadiness params={params} />
-    </Suspense>
+    <>
+      <Suspense fallback={null}>
+        <CalendarConnectErrorToast />
+      </Suspense>
+      <Suspense fallback={<SyncFallback />}>
+        <SyncReadiness params={params} />
+      </Suspense>
+    </>
   );
 }

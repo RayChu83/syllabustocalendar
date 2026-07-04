@@ -85,7 +85,7 @@ export async function saveGoogleRefreshToken({
   ok: boolean;
   avatar_url: string | null;
   email: string;
-  name: string;
+  name: string | null;
 }) {
   const refreshTokenHash = hashToken(refreshToken);
 
@@ -143,6 +143,8 @@ type GoogleAccessTokenResponse = {
   expires_in?: number;
   scope?: string;
   token_type?: string;
+  refresh_token?: string;
+  id_token?: string;
   error?: string;
   error_description?: string;
 };
@@ -170,6 +172,61 @@ async function mintGoogleAccessToken(refreshToken: string) {
   }
 
   return data.access_token;
+}
+
+export async function exchangeGoogleAuthCode(code: string, redirectUri: string) {
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: {
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      client_id: process.env.GOOGLE_CLIENT_ID!,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+      code,
+      redirect_uri: redirectUri,
+      grant_type: "authorization_code",
+    }),
+  });
+
+  const data = (await response.json()) as GoogleAccessTokenResponse;
+
+  if (!response.ok || !data.access_token || !data.refresh_token) {
+    throw new Error(
+      data.error_description ||
+        data.error ||
+        "Failed to exchange Google authorization code",
+    );
+  }
+
+  return data as GoogleAccessTokenResponse & {
+    access_token: string;
+    refresh_token: string;
+  };
+}
+
+type GoogleUserInfo = {
+  sub: string;
+  email?: string;
+  name?: string;
+  picture?: string;
+};
+
+export async function fetchGoogleUserInfo(accessToken: string) {
+  const response = await fetch(
+    "https://www.googleapis.com/oauth2/v3/userinfo",
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch Google account profile");
+  }
+
+  return (await response.json()) as GoogleUserInfo;
 }
 
 function toCalendarConnection(

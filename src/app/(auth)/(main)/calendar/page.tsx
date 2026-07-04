@@ -1,5 +1,6 @@
 import { getValidatedGoogleCalendarConnection } from "@/lib/google-oauth-tokens";
 import { serverClient } from "@/lib/supabase/server";
+import CalendarConnectErrorToast from "./_components/CalendarConnectErrorToast";
 import GoogleCalendarConnectButton from "./_components/GoogleCalendarConnectButton";
 import {
   AlertTriangle,
@@ -9,6 +10,7 @@ import {
   UserRound,
 } from "lucide-react";
 import Image from "next/image";
+import { Suspense } from "react";
 
 export default async function Calendar() {
   const supabase = await serverClient();
@@ -29,6 +31,9 @@ export default async function Calendar() {
 
   return (
     <main className="mt-17 flex flex-col gap-10 max-w-400 mx-auto p-6">
+      <Suspense fallback={null}>
+        <CalendarConnectErrorToast />
+      </Suspense>
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold tracking-tight">Calendar</h1>
