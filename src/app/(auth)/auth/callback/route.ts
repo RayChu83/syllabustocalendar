@@ -15,10 +15,13 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.session) {
-      console.log(data.session);
       const refreshToken = data.session.provider_refresh_token;
 
       if (refreshToken) {
+        console.log(
+          "Saving Google refresh token for user:",
+          data.session.user.id,
+        );
         await saveGoogleRefreshToken({
           supabase,
           userId: data.session.user.id,

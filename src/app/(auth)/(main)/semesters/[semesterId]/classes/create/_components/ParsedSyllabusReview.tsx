@@ -1,7 +1,9 @@
 "use client";
 
 import { SyllabusJSON } from "@/constants/types";
+import { cn } from "@/lib/utils";
 import type React from "react";
+import { useState } from "react";
 import { IoMdClose } from "react-icons/io";
 
 type DraftSetter = React.Dispatch<React.SetStateAction<SyllabusJSON | null>>;
@@ -10,6 +12,17 @@ type Day = SyllabusJSON["schedule"][number]["meetingDays"][number];
 type Note = ClassData["other"][number];
 
 const DAYS: Day[] = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
+const REVIEW_SECTIONS = [
+  { id: "class-details", label: "Class details" },
+  { id: "materials", label: "Materials" },
+  { id: "grading", label: "Grading" },
+  { id: "instructors", label: "Instructors" },
+  { id: "class-schedule", label: "Class schedule" },
+  { id: "deadlines", label: "Deadlines" },
+  { id: "additional-notes", label: "Additional notes" },
+] as const;
+
+type ReviewSectionId = (typeof REVIEW_SECTIONS)[number]["id"];
 
 const emptyNote = (): Note => ({ title: "", description: "" });
 
@@ -78,18 +91,28 @@ function TextArea({
 }
 
 function ReviewSection({
+  id,
+  activeSection,
   title,
   description,
   action,
   children,
 }: {
+  id: ReviewSectionId;
+  activeSection: ReviewSectionId;
   title: string;
   description: string;
   action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-neutral-200 bg-neutral-50/70 p-4 sm:p-5">
+    <section
+      id={id}
+      className={cn(
+        "rounded-3xl border border-neutral-200 bg-neutral-50/70 p-4 sm:p-5",
+        id !== activeSection && "lg:hidden",
+      )}
+    >
       <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-lg font-black tracking-tight text-neutral-700">
@@ -241,6 +264,9 @@ export default function ParsedSyllabusReview({
   draft: SyllabusJSON;
   setDraft: DraftSetter;
 }) {
+  const [activeSection, setActiveSection] =
+    useState<ReviewSectionId>("class-details");
+
   const updateDraft = (updater: (current: SyllabusJSON) => SyllabusJSON) => {
     setDraft((current) => (current ? updater(current) : current));
   };
@@ -256,8 +282,32 @@ export default function ParsedSyllabusReview({
   };
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[minmax(13rem,3fr)_minmax(0,7fr)] lg:items-start">
+      <nav
+        className="sticky top-20 hidden rounded-3xl border border-neutral-200 bg-white p-2 lg:flex lg:flex-col lg:gap-1"
+        aria-label="Parsed syllabus sections"
+      >
+        {REVIEW_SECTIONS.map((section) => (
+          <button
+            key={section.id}
+            type="button"
+            onClick={() => setActiveSection(section.id)}
+            className={cn(
+              "rounded-2xl px-4 py-3 text-left text-sm font-semibold tracking-tight transition-all",
+              activeSection === section.id
+                ? "bg-blue-500 text-white shadow-sm"
+                : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700",
+            )}
+          >
+            {section.label}
+          </button>
+        ))}
+      </nav>
+
+      <div className="flex min-w-0 flex-col gap-5">
       <ReviewSection
+        id="class-details"
+        activeSection={activeSection}
         title="Class details"
         description="Confirm the top-level course information before saving."
       >
@@ -302,6 +352,8 @@ export default function ParsedSyllabusReview({
       </ReviewSection>
 
       <ReviewSection
+        id="materials"
+        activeSection={activeSection}
         title="Materials"
         description="Books, software, supplies, and other required resources."
         action={
@@ -349,6 +401,8 @@ export default function ParsedSyllabusReview({
       </ReviewSection>
 
       <ReviewSection
+        id="grading"
+        activeSection={activeSection}
         title="Grading"
         description="Each grading component and its percentage weight."
         action={
@@ -417,6 +471,8 @@ export default function ParsedSyllabusReview({
       </ReviewSection>
 
       <ReviewSection
+        id="instructors"
+        activeSection={activeSection}
         title="Instructors"
         description="Instructor names, roles, contact emails, and office hours."
         action={
@@ -726,22 +782,21 @@ export default function ParsedSyllabusReview({
                       onChange={(value) =>
                         updateDraft((current) => ({
                           ...current,
-                          instructors: current.instructors.map(
-                            (item, index) =>
-                              index === instructorIndex
-                                ? {
-                                    ...item,
-                                    officeHours: item.officeHours.map(
-                                      (hour, itemIndex) =>
-                                        itemIndex === officeHourIndex
-                                          ? {
-                                              ...hour,
-                                              additionalNotes: value,
-                                            }
-                                          : hour,
-                                    ),
-                                  }
-                                : item,
+                          instructors: current.instructors.map((item, index) =>
+                            index === instructorIndex
+                              ? {
+                                  ...item,
+                                  officeHours: item.officeHours.map(
+                                    (hour, itemIndex) =>
+                                      itemIndex === officeHourIndex
+                                        ? {
+                                            ...hour,
+                                            additionalNotes: value,
+                                          }
+                                        : hour,
+                                  ),
+                                }
+                              : item,
                           ),
                         }))
                       }
@@ -759,6 +814,8 @@ export default function ParsedSyllabusReview({
       </ReviewSection>
 
       <ReviewSection
+        id="class-schedule"
+        activeSection={activeSection}
         title="Class schedule"
         description="Lecture, lab, discussion, or recurring class meeting times."
         action={
@@ -884,6 +941,8 @@ export default function ParsedSyllabusReview({
       </ReviewSection>
 
       <ReviewSection
+        id="deadlines"
+        activeSection={activeSection}
         title="Deadlines"
         description="Assignments, exams, projects, readings, and other calendar-ready dates."
         action={
@@ -970,11 +1029,15 @@ export default function ParsedSyllabusReview({
       </ReviewSection>
 
       <ReviewSection
+        id="additional-notes"
+        activeSection={activeSection}
         title="Additional class notes"
         description="Anything important that did not fit the structured fields."
         action={
           <AddButton
-            onClick={() => updateClass("other", [...draft.class.other, emptyNote()])}
+            onClick={() =>
+              updateClass("other", [...draft.class.other, emptyNote()])
+            }
           >
             Add note
           </AddButton>
@@ -1029,6 +1092,7 @@ export default function ParsedSyllabusReview({
           </p>
         )}
       </ReviewSection>
+      </div>
     </div>
   );
 }

@@ -34,6 +34,7 @@ export default function AddClassForm({ semesterId }: { semesterId: string }) {
   const [status, setStatus] = useState<
     "idle" | "parsing" | "draft" | "creating"
   >("idle");
+  const [draftTab, setDraftTab] = useState<"upload" | "review">("upload");
   const [syllabusJSONDraft, setSyllabusJSONDraft] =
     useState<SyllabusJSON | null>(null);
   const [syllabusRecordId, setSyllabusRecordId] = useState<number | null>(null);
@@ -90,7 +91,7 @@ export default function AddClassForm({ semesterId }: { semesterId: string }) {
   async function parseSyllabusText(file: File) {
     const formData = new FormData();
     formData.append("file", file);
-    const res = await fetch("/api/parseSyllabusText", {
+    const res = await fetch("/api/extractSyllabusText", {
       method: "POST",
       body: formData,
     });
@@ -479,52 +480,149 @@ export default function AddClassForm({ semesterId }: { semesterId: string }) {
           case "draft":
             return (
               <>
-                <section className="flex lg:flex-row flex-col gap-8 relative">
-                  <aside className="h-fit lg:sticky top-18.75">
-                    <div className="outline outline-neutral-200 rounded-2xl overflow-hidden mb-4">
-                      <Document
-                        file={syllabus.file?.objectUrl}
-                        onLoadSuccess={onDocumentLoadSuccess}
-                      >
-                        <Page pageNumber={pageNumber} />
-                      </Document>
+                <section className="flex flex-col gap-5">
+                  <div
+                    className="flex rounded-2xl bg-neutral-100 p-1 text-sm w-fit gap-1"
+                    role="tablist"
+                    aria-label="Draft class creation steps"
+                  >
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={draftTab === "upload"}
+                      onClick={() => setDraftTab("upload")}
+                      className={cn(
+                        "rounded-full px-4 py-2 font-semibold transition-all",
+                        draftTab === "upload"
+                          ? "bg-white text-blue-500"
+                          : "text-neutral-500 hover:text-neutral-700",
+                      )}
+                    >
+                      Syllabus Upload
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={draftTab === "review"}
+                      onClick={() => setDraftTab("review")}
+                      className={cn(
+                        "rounded-full px-4 py-2 font-semibold transition-all",
+                        draftTab === "review"
+                          ? "bg-white text-blue-500"
+                          : "text-neutral-500 hover:text-neutral-700",
+                      )}
+                    >
+                      Parsed Syllabus Review
+                    </button>
+                  </div>
+                  {draftTab === "upload" ? (
+                    <div
+                      role="tabpanel"
+                      className="flex flex-row flex-wrap gap-10"
+                    >
+                      <div className="min-w-0 w-fit">
+                        {syllabusType === "file" && syllabus.file?.objectUrl ? (
+                          <>
+                            <div className="overflow-hidden rounded-2xl outline outline-neutral-200">
+                              <Document
+                                file={syllabus.file.objectUrl}
+                                onLoadSuccess={onDocumentLoadSuccess}
+                              >
+                                <Page pageNumber={pageNumber} />
+                              </Document>
+                            </div>
+                            <div className="mt-4 flex w-fit items-center gap-2 rounded-2xl bg-neutral-50 p-1 text-sm">
+                              {numPages && (
+                                <>
+                                  <button
+                                    onClick={() => {
+                                      setPageNumber(
+                                        Math.max(1, pageNumber - 1),
+                                      );
+                                    }}
+                                    type="button"
+                                    className="cursor-pointer rounded-full px-4 py-2 text-neutral-500 transition-all duration-300 hover:bg-white hover:text-blue-500"
+                                  >
+                                    Prev
+                                  </button>
+                                  <span className="tracking-wider text-neutral-400">
+                                    {pageNumber} of {numPages}
+                                  </span>
+                                  <button
+                                    onClick={() => {
+                                      setPageNumber(
+                                        Math.min(numPages, pageNumber + 1),
+                                      );
+                                    }}
+                                    type="button"
+                                    className="cursor-pointer rounded-full px-4 py-2 text-neutral-500 transition-all duration-300 hover:bg-white hover:text-blue-500"
+                                  >
+                                    Next
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="max-h-[36rem] overflow-auto rounded-3xl border border-neutral-200 bg-white p-5 text-sm leading-6 text-neutral-600">
+                            <pre className="whitespace-pre-wrap font-sans">
+                              {syllabus.text}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
+                      <aside className="h-fit mb-4">
+                        <h2 className="text-lg font-bold tracking-tight text-neutral-700">
+                          {syllabus.file?.value.name || "Syllabus Upload"}
+                        </h2>
+                        <dl className="mt-3 flex items-start flex-wrap gap-6 text-sm">
+                          <div>
+                            <dt className="font-semibold text-neutral-400">
+                              Source type
+                            </dt>
+                            <dd className="mt-1 capitalize text-neutral-700">
+                              {syllabusType}
+                            </dd>
+                          </div>
+                          {syllabusType === "file" && syllabus.file ? (
+                            <>
+                              <div>
+                                <dt className="font-semibold text-neutral-400">
+                                  File size
+                                </dt>
+                                <dd className="mt-1 text-neutral-700">
+                                  {Math.max(
+                                    1,
+                                    Math.round(syllabus.file.value.size / 1024),
+                                  )}{" "}
+                                  KB
+                                </dd>
+                              </div>
+                            </>
+                          ) : (
+                            <div>
+                              <dt className="font-semibold text-neutral-400">
+                                Text length
+                              </dt>
+                              <dd className="mt-1 text-neutral-700">
+                                {syllabus.text.length.toLocaleString()}{" "}
+                                characters
+                              </dd>
+                            </div>
+                          )}
+                        </dl>
+                      </aside>
                     </div>
-                    <div className="flex items-center gap-2 bg-neutral-50 p-1 rounded-2xl w-fit text-sm">
-                      {numPages && (
-                        <>
-                          <button
-                            onClick={() => {
-                              setPageNumber(Math.max(1, pageNumber - 1));
-                            }}
-                            type="button"
-                            className="px-4 py-2 cursor-pointer rounded-full hover:bg-white hover:text-blue-500 transition-all duration-300 text-neutral-500"
-                          >
-                            Prev
-                          </button>
-                          <span className="tracking-wider text-neutral-400">
-                            {pageNumber} of {numPages}
-                          </span>
-                          <button
-                            onClick={() => {
-                              setPageNumber(Math.min(numPages, pageNumber + 1));
-                            }}
-                            type="button"
-                            className="px-4 py-2 cursor-pointer rounded-full hover:bg-white hover:text-blue-500 transition-all duration-300 text-neutral-500"
-                          >
-                            Next
-                          </button>
-                        </>
+                  ) : (
+                    <div role="tabpanel">
+                      {syllabusJSONDraft && (
+                        <ParsedSyllabusReview
+                          draft={syllabusJSONDraft}
+                          setDraft={setSyllabusJSONDraft}
+                        />
                       )}
                     </div>
-                  </aside>
-                  <aside className="flex flex-col gap-4 w-full">
-                    {syllabusJSONDraft && (
-                      <ParsedSyllabusReview
-                        draft={syllabusJSONDraft}
-                        setDraft={setSyllabusJSONDraft}
-                      />
-                    )}
-                  </aside>
+                  )}
                 </section>
                 <section className="flex items-center justify-end gap-4">
                   <button

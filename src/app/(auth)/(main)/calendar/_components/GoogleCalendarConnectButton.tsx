@@ -6,7 +6,13 @@ import { CalendarPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export default function GoogleCalendarConnectButton() {
+export default function GoogleCalendarConnectButton({
+  label = "Connect Google Calendar",
+  nextPath = "/calendar",
+}: {
+  label?: string;
+  nextPath?: string;
+}) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleConnectGoogleCalendar = async () => {
@@ -15,7 +21,7 @@ export default function GoogleCalendarConnectButton() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/calendar`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
         scopes: "https://www.googleapis.com/auth/calendar",
         queryParams: {
           access_type: "offline",
@@ -35,7 +41,7 @@ export default function GoogleCalendarConnectButton() {
   return (
     <Button onClick={handleConnectGoogleCalendar} disabled={isLoading}>
       <CalendarPlus data-icon="inline-start" />
-      {isLoading ? "Redirecting..." : "Connect Google Calendar"}
+      {isLoading ? "Redirecting..." : label}
     </Button>
   );
 }

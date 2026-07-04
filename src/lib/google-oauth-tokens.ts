@@ -55,6 +55,21 @@ function hashToken(token: string) {
   return crypto.createHmac("sha256", hashSecret).update(token).digest("hex");
 }
 
+type GoogleCalendarConnection = {
+  user_id: string;
+  avatar_url: string | null;
+  email: string;
+  name: string | null;
+  ok: boolean;
+  created_at: string;
+};
+
+type GoogleCalendarTokenRecord = GoogleCalendarConnection & {
+  encrypted_refresh_token: string | null;
+  iv: string | null;
+  auth_tag: string | null;
+};
+
 export async function saveGoogleRefreshToken({
   supabase,
   userId,
@@ -85,6 +100,20 @@ export async function saveGoogleRefreshToken({
   }
 
   if (existing?.hashed_refresh_token === refreshTokenHash) {
+    const { error: updateError } = await supabase
+      .from("google_oauth_tokens")
+      .update({
+        ok,
+        avatar_url,
+        email,
+        name,
+      })
+      .eq("user_id", userId);
+
+    if (updateError) {
+      throw updateError;
+    }
+
     return;
   }
 
@@ -107,4 +136,163 @@ export async function saveGoogleRefreshToken({
   if (upsertError) {
     throw upsertError;
   }
+}
+
+type GoogleAccessTokenResponse = {
+  access_token?: string;
+  expires_in?: number;
+  scope?: string;
+  token_type?: string;
+  error?: string;
+  error_description?: string;
+};
+
+async function mintGoogleAccessToken(refreshToken: string) {
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: {
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      client_id: process.env.GOOGLE_CLIENT_ID!,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+      refresh_token: refreshToken,
+      grant_type: "refresh_token",
+    }),
+  });
+
+  const data = (await response.json()) as GoogleAccessTokenResponse;
+
+  if (!response.ok || !data.access_token) {
+    throw new Error(
+      data.error_description || data.error || "Failed to mint access token",
+    );
+  }
+
+  return data.access_token;
+}
+
+function toCalendarConnection(
+  tokenRecord: GoogleCalendarTokenRecord,
+  ok: boolean,
+): GoogleCalendarConnection {
+  return {
+    user_id: tokenRecord.user_id,
+    avatar_url: tokenRecord.avatar_url,
+    email: tokenRecord.email,
+    name: tokenRecord.name,
+    ok,
+    created_at: tokenRecord.created_at,
+  };
+}
+
+async function updateGoogleConnectionStatus({
+  supabase,
+  userId,
+  ok,
+}: {
+  supabase: SupabaseClient;
+  userId: string;
+  ok: boolean;
+}) {
+  const { error } = await supabase
+    .from("google_oauth_tokens")
+    .update({ ok })
+    .eq("user_id", userId);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function getValidatedGoogleCalendarConnection(
+  supabase: SupabaseClient,
+  userId: string,
+) {
+  const { data: tokenRecord, error: tokenError } = await supabase
+    .from("google_oauth_tokens")
+    .select(
+      "user_id,avatar_url,email,name,ok,created_at,encrypted_refresh_token,iv,auth_tag",
+    )
+    .eq("user_id", userId)
+    .maybeSingle<GoogleCalendarTokenRecord>();
+
+  if (tokenError) {
+    throw tokenError;
+  }
+
+  if (!tokenRecord) {
+    return null;
+  }
+
+  try {
+    if (
+      !tokenRecord.encrypted_refresh_token ||
+      !tokenRecord.iv ||
+      !tokenRecord.auth_tag
+    ) {
+      throw new Error("Google Calendar connection is missing token data");
+    }
+
+    const refreshToken = decrypt({
+      encryptedToken: tokenRecord.encrypted_refresh_token,
+      iv: tokenRecord.iv,
+      authTag: tokenRecord.auth_tag,
+    });
+
+    const accessToken = await mintGoogleAccessToken(refreshToken);
+
+    if (!tokenRecord.ok) {
+      await updateGoogleConnectionStatus({ supabase, userId, ok: true });
+    }
+
+    return toCalendarConnection(tokenRecord, true);
+  } catch (error) {
+    console.error("Google Calendar connection validation failed", {
+      userId,
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+
+    try {
+      await updateGoogleConnectionStatus({ supabase, userId, ok: false });
+    } catch (updateError) {
+      console.error("Failed to update Google Calendar connection status", {
+        userId,
+        message:
+          updateError instanceof Error ? updateError.message : "Unknown error",
+      });
+    }
+
+    return toCalendarConnection(tokenRecord, false);
+  }
+}
+
+export async function retrieveGoogleAccessToken(
+  supabase: SupabaseClient,
+  userId: string,
+) {
+  const { data: tokenRecord, error: tokenError } = await supabase
+    .from("google_oauth_tokens")
+    .select("encrypted_refresh_token,iv,auth_tag")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (
+    tokenError ||
+    !tokenRecord?.encrypted_refresh_token ||
+    !tokenRecord?.iv ||
+    !tokenRecord?.auth_tag
+  ) {
+    throw tokenError || new Error("Google Calendar is not connected");
+  }
+
+  const refreshToken = decrypt({
+    encryptedToken: tokenRecord.encrypted_refresh_token,
+    iv: tokenRecord.iv,
+    authTag: tokenRecord.auth_tag,
+  });
+
+  const accessToken = await mintGoogleAccessToken(refreshToken);
+
+  return accessToken;
 }

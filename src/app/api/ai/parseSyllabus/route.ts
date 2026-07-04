@@ -62,23 +62,23 @@ export async function POST(req: NextRequest) {
                       role : string, (e.g. "Professor", "Assistant Professor", "Teaching Assistant")
                       officeHours: {
                         location: string, (e.g. "Room 101", "Virtual")
-                        startTime: string, (Extract office hour start-time into 24-hour format "HH:mm", e.g. "4:00 PM" → "16:00")
-                        endTime: string, (Extract office hour end-time into 24-hour format "HH:mm", e.g. "4:00 PM" → "16:00")
+                        startTime: string, (Extract office hour start-time into 24-hour format "HH:mm", e.g. "4:00 PM" -> "16:00")
+                        endTime: string, (Extract office hour end-time into 24-hour format "HH:mm", e.g. "4:00 PM" -> "16:00")
                         meetingDays : string[], (e.g. ["MO", "WE", "FR"])
                         additionalNotes: { title: string, description: string }[] (Any additional notes regarding instructor information that doesn't fit into the above fields.)
                       }[]
                   }[],
                   schedule: {
                       location: string, (e.g. "Room 101", "Virtual")
-                      startTime: string, (Extract class start-time into 24-hour format "HH:mm", e.g. "4:00 PM" → "16:00")
-                      endTime: string, (Extract class end-time into 24-hour format "HH:mm", e.g. "4:00 PM" → "16:00")
+                      startTime: string, (Extract class start-time into 24-hour format "HH:mm", e.g. "4:00 PM" -> "16:00")
+                      endTime: string, (Extract class end-time into 24-hour format "HH:mm", e.g. "4:00 PM" -> "16:00")
                       meetingDays : string[], (e.g. ["MO", "WE", "FR"])
                       additionalNotes: { title: string, description: string }[] (Any additional notes regarding class meeting times information that doesn't fit into the above fields.)
                   }[], (In the case of different lecture and discussion times, have multiple schedule objects in the array.)
                   deadlines: {
                       title: string, (e.g. Essay 1, Midterm Exam 1, Project 1)
                       dueDate: string, (Extract deadline date into "YYYY-MM-DD" format. If the year is not specified, infer it from the syllabus term if possible. e.g. 2026-10-15)
-                      dueTime : string, (Extract deadline time into 24-hour format "HH:mm", e.g. "4:00 PM" → "16:00")
+                      dueTime : string, (Extract deadline time into 24-hour format "HH:mm", e.g. "4:00 PM" -> "16:00")
                   }[], (An array of every deadline including homeworks, projects, exams. Each deadline must be a separate object in the array.)
                   ok : boolean, (e.g. if the syllabus provided does not contain any sufficient information or is not a syllabus at all, set ok: false)
                 }
