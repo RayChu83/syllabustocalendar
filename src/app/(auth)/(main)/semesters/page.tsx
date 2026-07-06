@@ -30,7 +30,7 @@ export default async function Semesters() {
 
   return (
     <>
-      <main className="mt-17 flex flex-col gap-2 max-w-400 mx-auto p-6">
+      <main className="mt-17 flex flex-col gap-2 max-w-320 mx-auto p-6">
         <header className="mb-8 flex flex-col gap-1.5 w-fit">
           <Link
             href="/dashboard"

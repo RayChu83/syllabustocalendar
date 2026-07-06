@@ -284,7 +284,7 @@ export default async function Class({
   });
 
   return (
-    <main className="mx-auto mt-17 flex max-w-400 flex-col gap-8 p-4 sm:p-6">
+    <main className="mx-auto mt-17 flex max-w-320 flex-col gap-8 p-4 sm:p-6">
       <header className="flex flex-col gap-4">
         <Link
           href={`/semesters/${semesterId}`}

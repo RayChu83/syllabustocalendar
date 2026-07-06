@@ -60,7 +60,7 @@ export default async function SemesterDetailed({
   if (scheduleDataError) throw Error(scheduleDataError.message);
 
   return (
-    <main className="mx-auto mt-17 flex max-w-400 flex-col gap-8 p-6">
+    <main className="mx-auto mt-17 flex max-w-320 flex-col gap-8 p-6">
       <header className="flex flex-col gap-3">
         <Link
           href="/semesters"

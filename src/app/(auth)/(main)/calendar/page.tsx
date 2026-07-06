@@ -30,7 +30,7 @@ export default async function Calendar() {
   );
 
   return (
-    <main className="mt-17 flex flex-col gap-10 max-w-400 mx-auto p-6">
+    <main className="mt-17 flex flex-col gap-10 max-w-320 mx-auto p-6">
       <Suspense fallback={null}>
         <CalendarConnectErrorToast />
       </Suspense>
@@ -114,7 +114,9 @@ export default async function Calendar() {
           <GoogleCalendarConnectButton />
         )}
 
-        {googleToken && !googleToken.ok ? <GoogleCalendarConnectButton /> : null}
+        {googleToken && !googleToken.ok ? (
+          <GoogleCalendarConnectButton />
+        ) : null}
       </section>
     </main>
   );

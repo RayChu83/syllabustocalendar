@@ -10,7 +10,7 @@ import CalendarSyncForm from "./_components/CalendarSyncForm";
 
 function SyncFallback() {
   return (
-    <main className="mx-auto mt-17 flex min-h-[calc(100vh-4.25rem)] max-w-400 items-center justify-center p-6">
+    <main className="mx-auto mt-17 flex min-h-[calc(100vh-4.25rem)] max-w-320 items-center justify-center p-6">
       <section
         className="flex flex-col items-center gap-4 rounded-[2rem] border border-neutral-200 bg-white p-8 text-center shadow-sm"
         aria-live="polite"
@@ -81,7 +81,7 @@ async function SyncReadiness({
 
   if (!googleCalendarConnection?.ok) {
     return (
-      <main className="mx-auto mt-17 flex min-h-[calc(100vh-4.25rem)] max-w-400 items-center justify-center p-6">
+      <main className="mx-auto mt-17 flex min-h-[calc(100vh-4.25rem)] max-w-320 items-center justify-center p-6">
         <section className="flex max-w-xl flex-col gap-5 rounded-[2rem] border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
             <CalendarOff />

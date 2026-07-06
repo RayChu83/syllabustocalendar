@@ -43,7 +43,7 @@ export default function NavMenu() {
   return (
     <motion.nav>
       <motion.header
-        className={`py-4 px-6 flex items-center justify-between gap-8 fixed w-full top-0 z-50 transition-all duration-700 border-b border border-transparent ${
+        className={`py-4 px-6 max-w-320 left-1/2 -translate-x-1/2 flex items-center justify-between gap-8 fixed w-full top-0 z-50 transition-all duration-700 border-b border border-transparent ${
           scrolled || mobileNavOpen ? "backdrop-blur-lg" : ""
         }`}
       >
@@ -66,34 +66,13 @@ export default function NavMenu() {
           </NavLink>
           <NavLink
             pathname={pathname}
-            href="/assignments"
-            className="md:block! hidden!"
-          >
-            Assignments
-          </NavLink>
-          <NavLink
-            pathname={pathname}
             href="/calendar"
             className="md:block! hidden!"
           >
-            Calendar
+            Calendars
           </NavLink>
         </aside>
         <aside className="flex items-center justify-center gap-8">
-          <NavLink
-            pathname={pathname}
-            href="/semesters"
-            className="md:block! hidden!"
-          >
-            Semesters
-          </NavLink>
-          <NavLink
-            pathname={pathname}
-            href="/classes"
-            className="md:block! hidden!"
-          >
-            Classes
-          </NavLink>
           <div className="flex items-center gap-4">
             <button
               className={cn(
