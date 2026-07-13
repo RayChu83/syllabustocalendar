@@ -491,33 +491,31 @@ ${JSON.stringify(scheduleEvents, null, 2)}
 
     setIsSyncing(true);
 
-    console.log("Agent Prompt:", agentPrompt);
+    try {
+      const response = await fetch("/api/ai/agent/googleCalendar", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ body: agentPrompt }),
+      });
+      const data = await response.json();
 
-    // try {
-    //   const response = await fetch("/api/ai/agent/googleCalendar", {
-    //     method: "POST",
-    //     headers: { "content-type": "application/json" },
-    //     body: JSON.stringify({ body: agentPrompt }),
-    //   });
-    //   const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to prepare calendar sync");
+      }
 
-    //   if (!response.ok) {
-    //     throw new Error(data.error || "Failed to prepare calendar sync");
-    //   }
-
-    //   toast.success("Calendar sync completed", {
-    //     description: skippedItems
-    //       ? `${skippedItems} selected item(s) were skipped because required date or time data was missing.`
-    //       : undefined,
-    //   });
-    // } catch (error) {
-    //   toast.error("Calendar sync failed", {
-    //     description:
-    //       error instanceof Error ? error.message : "Unexpected sync error",
-    //   });
-    // } finally {
-    //   setIsSyncing(false);
-    // }
+      toast.success("Calendar sync completed", {
+        description: skippedItems
+          ? `${skippedItems} selected item(s) were skipped because required date or time data was missing.`
+          : undefined,
+      });
+    } catch (error) {
+      toast.error("Calendar sync failed", {
+        description:
+          error instanceof Error ? error.message : "Unexpected sync error",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
   }
 
   return (

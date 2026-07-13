@@ -9,8 +9,6 @@ export async function POST(request: NextRequest) {
   const { body } = await request.json();
   const supabase = await serverClient();
 
-  console.log(body);
-
   const {
     data: { user },
     error: userError,

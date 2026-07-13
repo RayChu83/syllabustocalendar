@@ -138,12 +138,14 @@ export default function AddSemesterForm() {
         <div className="w-full space-y-1.5">
           <Select
             value={semesterDetails.grade.value}
-            onValueChange={(value) =>
-              setSemesterDetails((prev) => ({
-                ...prev,
-                grade: { value, error: "" },
-              }))
-            }
+            onValueChange={(value) => {
+              if (value) {
+                setSemesterDetails((prev) => ({
+                  ...prev,
+                  grade: { value, error: "" },
+                }));
+              }
+            }}
           >
             <SelectTrigger
               className={cn(

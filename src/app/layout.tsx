@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
-import { Stack_Sans_Headline } from "next/font/google";
+import { Stack_Sans_Headline, Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { cn } from "@/lib/utils";
+import { TooltipProvider } from "@/components/ui/tooltip";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const stackSansHeadlineFont = Stack_Sans_Headline({ subsets: ["latin"] });
 
@@ -24,9 +28,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn("font-sans", inter.variable)}>
       <body className={`${stackSansHeadlineFont.className}`} id="portal-root">
-        {children}
+        <TooltipProvider>{children}</TooltipProvider>
         <Toaster position="bottom-right" closeButton />
       </body>
     </html>

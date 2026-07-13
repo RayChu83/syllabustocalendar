@@ -1,12 +1,11 @@
 import { serverClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
 import Image from "next/image";
-import { FaFolderOpen, FaGraduationCap } from "react-icons/fa6";
+import { FaGraduationCap } from "react-icons/fa6";
 import { BiSolidCalendar } from "react-icons/bi";
-import { HiDotsVertical } from "react-icons/hi";
-import Link from "next/link";
-import { MdOutlineKeyboardArrowRight } from "react-icons/md";
-import { SemesterWithClasses } from "@/constants";
+import SemestersList from "./_components/SemestersList";
+import { Suspense } from "react";
+import ClassesList from "./_components/ClassesList";
 
 export default async function Dashboard() {
   const supabase = await serverClient();
@@ -28,21 +27,6 @@ export default async function Dashboard() {
   if (!profile || profileError) {
     throw Error("Failed to retrieve user profile");
   }
-
-  const { data: semestersData, error: semestersDataError } = await supabase
-    .from("semesters")
-    .select("*, classes(id, title)");
-
-  const semesters: SemesterWithClasses[] = semestersData
-    ? semestersData.map((s) => ({
-        ...s,
-        created_at: new Date(s.created_at),
-      }))
-    : [];
-
-  if (semestersDataError) throw Error(semestersDataError.message);
-
-  console.log(semesters);
 
   return (
     <main className="mt-24 max-w-320 m-auto p-6">
@@ -73,8 +57,11 @@ export default async function Dashboard() {
           </li>
         </ul>
       </header>
-      <div className="w-full flex overflow-auto gap-4 mb-6">
-        <button className="text-neutral-400 flex flex-col gap-2 items-center group">
+      <h2 className="text-neutral-500 mb-4 text-xl tracking-tight">
+        Lets get started,
+      </h2>
+      <div className="w-full flex overflow-auto gap-4 mb-8 snap-x self-start">
+        <button className="text-neutral-400 flex flex-col gap-2 items-center group snap-start">
           <div className="bg-neutral-100 rounded-2xl sm:size-56 size-48 group-hover:brightness-[0.975] transition-all duration-300 bg-cover bg-center relative flex items-center justify-center overflow-hidden p-4">
             <Image
               src="/graphics/semesters.png"
@@ -87,7 +74,7 @@ export default async function Dashboard() {
           </div>
           <span className="tracking-tight">Start first semester</span>
         </button>
-        <button className="text-neutral-400 flex flex-col gap-2 items-center group">
+        <button className="text-neutral-400 flex flex-col gap-2 items-center group snap-start">
           <div className="bg-neutral-100 rounded-2xl sm:size-56 size-48 group-hover:brightness-[0.975] transition-all duration-300 bg-cover bg-center relative flex items-center justify-center overflow-hidden p-4">
             <Image
               src="/graphics/classes.png"
@@ -100,7 +87,7 @@ export default async function Dashboard() {
           </div>
           <span className="tracking-tight">Add your first class</span>
         </button>
-        <button className="text-neutral-400 flex flex-col gap-2 items-center group">
+        <button className="text-neutral-400 flex flex-col gap-2 items-center group snap-start">
           <div className="bg-neutral-100 rounded-2xl sm:size-56 size-48 group-hover:brightness-[0.975] transition-all duration-300 bg-cover bg-center relative flex items-center justify-center overflow-hidden p-4">
             <Image
               src="/graphics/assignments.png"
@@ -113,7 +100,7 @@ export default async function Dashboard() {
           </div>
           <span className="tracking-tight">Create assignment</span>
         </button>
-        <button className="text-neutral-400 flex flex-col gap-2 items-center group">
+        <button className="text-neutral-400 flex flex-col gap-2 items-center group snap-start">
           <div className="bg-neutral-100 rounded-2xl sm:size-56 size-48 group-hover:brightness-[0.975] transition-all duration-300 bg-cover bg-center relative flex items-center justify-center overflow-hidden p-4">
             <Image
               src="/graphics/calendar.png"
@@ -127,30 +114,12 @@ export default async function Dashboard() {
           <span className="tracking-tight">Sync calendar</span>
         </button>
       </div>
-      <button className="text-lg text-neutral-500 rounded-full flex items-center gap-1.5 mb-4 group cursor-pointer tracking-tight">
-        <MdOutlineKeyboardArrowRight style={{ rotate: "90deg" }} />
-        <h6>Semesters</h6>
-      </button>
-      <div className="flex flex-row flex-nowrap overflow-auto gap-4 snap-x">
-        {semesters.map((semester, index) => (
-          <Link
-            href={`/semesters/${semester.id}`}
-            key={index}
-            className="p-6 rounded-xl bg-neutral-50 flex flex-col items-start min-w-74 hover:bg-neutral-100 transition-all duration-300"
-          >
-            <div className="mb-2 text-neutral-500 flex items-center justify-between w-full">
-              <FaFolderOpen size={24} />
-              <button>
-                <HiDotsVertical />
-              </button>
-            </div>
-            <span className="text-neutral-700">{semester.title}</span>
-            <span className="text-sm text-neutral-500">
-              {semester.classes.length} classes
-            </span>
-          </Link>
-        ))}
-      </div>
+      <Suspense fallback={<>Loading</>}>
+        <SemestersList />
+      </Suspense>
+      <Suspense fallback={<>Loading</>}>
+        <ClassesList />
+      </Suspense>
     </main>
   );
 }

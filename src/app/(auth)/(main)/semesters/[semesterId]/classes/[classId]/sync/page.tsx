@@ -99,6 +99,7 @@ async function SyncReadiness({
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild variant="outline">
+              {" "}
               <Link href={`/semesters/${semesterId}/classes/${classId}`}>
                 <ArrowLeft data-icon="inline-start" />
                 Return to Class

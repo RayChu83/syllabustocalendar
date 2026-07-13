@@ -55,6 +55,16 @@ export type SemesterWithClasses = Semester & {
   classes: { id: string; title: string }[];
 };
 
+export type ClassPreview = {
+  id: string;
+  title: string;
+  semester_id: string;
+  deadlines: {
+    due_date: string;
+    due_time: string | null;
+  }[];
+};
+
 export type Classes = {
   created_at: Date;
   title: string;

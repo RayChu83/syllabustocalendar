@@ -1,6 +1,13 @@
-import { syllabusTextSchema } from "@/constants/schemas";
+import {
+  normalizeSyllabus,
+  syllabusSchema,
+  syllabusTextSchema,
+  syllabusWireSchema,
+} from "@/constants/schemas";
+import { serverClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { zodTextFormat } from "openai/helpers/zod";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -8,6 +15,16 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
   const { syllabusText } = await req.json();
+  const supabase = await serverClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user || userError) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   try {
     syllabusTextSchema.parse(syllabusText);
@@ -19,93 +36,65 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await openai.responses.parse({
       model: "gpt-5-mini",
-      messages: [
+      input: [
         {
           role: "system",
           content: `
-            You are a data extraction engine.
-            You convert syllabus text into strictly valid JSON.
+You are an expert at extracting structured information from a course syllabus.
 
-            General Rules:
-              - Return only valid JSON and do not include additional non JSON text
-              - It is okay to summarize long text fields concisely while preserving key meaning
-              - Do not use ellipses (...) to shorten text
-              - If any of the fields are empty, still include them in the output with empty string "" or empty array [] as value
-              - For any missing dates, please use null as the value instead of an empty string
-              - Assume titles to be less than 1 sentence and descriptions to be 2-3 sentences max
-              - Please do not use/assume any information outside the syllabus text provided
-              - Please assume all years to be in the current year: ${new Date().getFullYear()}
-                `,
+Never invent information. If something is missing, do not invent information, fallback on the default values in the schema.
+
+It is okay to summarize long text fields concisely while preserving key meaning
+
+Do not use ellipses (...) to shorten text
+
+Please assume all years to be in the current year: ${new Date().getFullYear()}
+`,
         },
+
         {
           role: "user",
           content: `
-                Extract structured data from the syllabus below.
+Extract all course details, assignments, professor information, and due dates.
 
-                Schema:
+Syllabus:
 
-                {
-                  class: {
-                      title: string, (e.g. "Calculus 1", "English 101")
-                      overview: string, (A brief summary of the course content and objectives.)
-                      materials: string[], (A string list of required textbooks, software, or other materials needed for the course)
-                      grading: { type: string, weight: number }[], (A breakdown of grading components, e.g. [{ type: "Homework", weight: 30 }, { type: "Midterm Exam", weight: 30 }, { type: "Final Exam", weight: 40 }])
-                      startDate : string, (Extract semester start date into "YYYY-MM-DD" format. If not explicitly listed, infer it is the very first date mentioned e.g. 2026-08-23)
-                      endDate : string, (Extract semester end date into "YYYY-MM-DD" format. If not explicitly listed, infer it is the very last date mentioned e.g. 2026-12-15)
-                      other: { title: string, description: string }[], (A fallback array for any important class information that doesn't fit into the above fields. Each item should have a concise title and a brief summarized description.)
-                  },
-                  instructors: {
-                      name: string, (e.g. "Professor. Smith")
-                      email: string[], (A list of contact emails for the instructor, if available)
-                      role : string, (e.g. "Professor", "Assistant Professor", "Teaching Assistant")
-                      officeHours: {
-                        location: string, (e.g. "Room 101", "Virtual")
-                        startTime: string, (Extract office hour start-time into 24-hour format "HH:mm", e.g. "4:00 PM" -> "16:00")
-                        endTime: string, (Extract office hour end-time into 24-hour format "HH:mm", e.g. "4:00 PM" -> "16:00")
-                        meetingDays : string[], (e.g. ["MO", "WE", "FR"])
-                        additionalNotes: { title: string, description: string }[] (Any additional notes regarding instructor information that doesn't fit into the above fields.)
-                      }[]
-                  }[],
-                  schedule: {
-                      location: string, (e.g. "Room 101", "Virtual")
-                      startTime: string, (Extract class start-time into 24-hour format "HH:mm", e.g. "4:00 PM" -> "16:00")
-                      endTime: string, (Extract class end-time into 24-hour format "HH:mm", e.g. "4:00 PM" -> "16:00")
-                      meetingDays : string[], (e.g. ["MO", "WE", "FR"])
-                      additionalNotes: { title: string, description: string }[] (Any additional notes regarding class meeting times information that doesn't fit into the above fields.)
-                  }[], (In the case of different lecture and discussion times, have multiple schedule objects in the array.)
-                  deadlines: {
-                      title: string, (e.g. Essay 1, Midterm Exam 1, Project 1)
-                      dueDate: string, (Extract deadline date into "YYYY-MM-DD" format. If the year is not specified, infer it from the syllabus term if possible. e.g. 2026-10-15)
-                      dueTime : string, (Extract deadline time into 24-hour format "HH:mm", e.g. "4:00 PM" -> "16:00")
-                  }[], (An array of every deadline including homeworks, projects, exams. Each deadline must be a separate object in the array.)
-                  ok : boolean, (e.g. if the syllabus provided does not contain any sufficient information or is not a syllabus at all, set ok: false)
-                }
-
-                Syllabus:
-                ${syllabusText}
-            `,
+${syllabusText}
+`,
         },
       ],
-      max_completion_tokens: 5000,
-      temperature: 1,
+      text: { format: zodTextFormat(syllabusWireSchema, "calendar_event") },
+      max_output_tokens: 5000,
     });
 
-    const raw = response.choices[0].message?.content || "";
-
-    let parsed;
-
     try {
-      parsed = JSON.parse(raw);
+      if (!response.output_parsed) {
+        return NextResponse.json(
+          { error: "An unexpected output was received" },
+          { status: 500 },
+        );
+      }
+
+      const parsedSyllabus = normalizeSyllabus(response.output_parsed);
+      const isValid = syllabusSchema.safeParse(parsedSyllabus);
+      if (!isValid.success) {
+        console.error("Parsed syllabus validation error:", isValid.error);
+        return NextResponse.json(
+          { error: "Parsed syllabus does not match the expected schema" },
+          { status: 500 },
+        );
+      }
+      console.log("Parsed syllabus JSON:", parsedSyllabus);
+
+      return NextResponse.json(parsedSyllabus, { status: 200 });
     } catch {
       return NextResponse.json(
         { error: "An unexpected output was received" },
         { status: 500 },
       );
     }
-
-    return NextResponse.json(parsed, { status: 200 });
   } catch (err) {
     console.error(err);
     return NextResponse.json(

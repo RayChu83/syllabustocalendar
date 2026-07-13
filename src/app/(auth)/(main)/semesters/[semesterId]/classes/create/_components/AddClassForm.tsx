@@ -244,6 +244,7 @@ export default function AddClassForm({ semesterId }: { semesterId: string }) {
 
         // check if syllabus with the same hash already exists in the database
         const existingSyllabus = await checkSyllabusExists(hash);
+        console.log(existingSyllabus);
         if (existingSyllabus) {
           // Syllabus already exists
           toast.info("This syllabus has already been uploaded.");

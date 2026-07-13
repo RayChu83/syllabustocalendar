@@ -19,11 +19,9 @@ export default function NavLink({
     <Link
       href={href}
       className={cn(
-        "text-sm transition-all duration-300 tracking-wider text-nowrap outline-none font-light",
+        "text-sm transition-all duration-300 tracking-tight text-nowrap outline-none",
         className,
-        pathname === href
-          ? "text-neutral-700"
-          : "animated-underline text-zinc-500 hover:text-zinc-400",
+        pathname === href ? "text-neutral-600" : "text-neutral-400",
       )}
       onClick={onClick ? onClick : undefined}
     >

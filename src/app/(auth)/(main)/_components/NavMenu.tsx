@@ -5,13 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import NavLink from "../../../../components/ui/NavLink";
-import { AiOutlineMenu } from "react-icons/ai";
-import { Tooltip, TooltipContent } from "../../../../components/ui/tooltip";
-import { TooltipTrigger } from "@radix-ui/react-tooltip";
-import { GoArrowRight } from "react-icons/go";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabaseBrowserClient as supabase } from "@/lib/supabase/browser";
+import { HiMiniBars2 } from "react-icons/hi2";
+import { MdArrowOutward } from "react-icons/md";
 
 export default function NavMenu() {
   // state used for determining whether the user scrolled (navbar white background)
@@ -43,19 +41,14 @@ export default function NavMenu() {
   return (
     <motion.nav>
       <motion.header
-        className={`py-4 px-6 max-w-320 left-1/2 -translate-x-1/2 flex items-center justify-between gap-8 fixed w-full top-0 z-50 transition-all duration-700 border-b border border-transparent ${
-          scrolled || mobileNavOpen ? "backdrop-blur-lg" : ""
+        className={`py-4 px-6 left-1/2 -translate-x-1/2 flex items-center justify-between gap-8 fixed w-full top-0 z-50 transition-all duration-700 bg-white ${
+          scrolled || mobileNavOpen ? "drop-shadow-xs" : ""
         }`}
       >
-        <aside className="flex items-center justify-center gap-8">
+        <aside className="flex items-center justify-center gap-6">
           <Link className="flex items-center gap-0.5" href="/">
-            <Image
-              src="/logos/svg/advyna_colored_clear.svg"
-              width={36}
-              height={36}
-              alt="Advyna Logo"
-            />
-            <h1 className="font-semibold text-xl text-neutral-700">Advyna</h1>
+            {/* <HiOutlineBookOpen size={24} className="text-neutral-700" /> */}
+            <Image src="/logos/logo1.png" alt="logo" width={24} height={24} />
           </Link>
           <NavLink
             pathname={pathname}
@@ -73,27 +66,22 @@ export default function NavMenu() {
           </NavLink>
         </aside>
         <aside className="flex items-center justify-center gap-8">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <button
               className={cn(
-                "rounded-full hover:brightness-90 text-sm px-5 py-2.5 bg-black text-white",
+                "text-sm text-red-700 flex items-center gap-1.5",
                 mobileNavOpen ? "md:opacity-100 opacity-0" : null,
               )}
               onClick={handleSignOut}
             >
-              Sign out
+              Sign out <MdArrowOutward />
             </button>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  className="md:hidden block text-lg text-zinc-400 hover:text-zinc-300 active:text-zinc-300 transition-all duration-300 cursor-pointer"
-                  onClick={() => setMobileNavOpen((prev) => !prev)}
-                >
-                  <AiOutlineMenu />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>Show menu</TooltipContent>
-            </Tooltip>
+            <button
+              className="md:hidden block text-lg text-neutral-700 transition-all duration-300 cursor-pointer"
+              onClick={() => setMobileNavOpen((prev) => !prev)}
+            >
+              <HiMiniBars2 />
+            </button>
           </div>
         </aside>
       </motion.header>
@@ -120,61 +108,61 @@ function MobileNavMenu({
   return (
     <section
       className={cn(
-        "backdrop-blur-lg fixed top-17 w-full z-50 flex flex-col items-center justify-between transition-all duration-700 md:-left-full",
+        "bg-white fixed top-13 w-full z-50 flex flex-col items-center justify-between transition-all duration-700 md:-left-full",
         !mobileNavOpen ? "-left-full" : "left-0",
       )}
-      style={{ height: "calc(100dvh - 74px)" }}
+      style={{ height: "calc(100dvh - 56px)" }}
     >
-      <div className="flex flex-col items-center justify-between w-full p-4 gap-2">
+      <div className="flex flex-col items-center justify-between w-full p-4 gap-2 h-fit overflow-auto">
         <NavLink
           pathname={pathname}
           href="/dashboard"
-          className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10`}
+          className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10 text-base`}
           onClick={() => {
             setMobileNavOpen(false);
           }}
         >
-          Dashboard <GoArrowRight className="text-xl" />
+          Dashboard <MdArrowOutward className="text-xl" />
         </NavLink>
         <NavLink
           pathname={pathname}
           href="/assignments"
-          className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10`}
+          className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10 text-base`}
           onClick={() => {
             setMobileNavOpen(false);
           }}
         >
-          Assignments <GoArrowRight className="text-xl" />
+          Assignments <MdArrowOutward className="text-xl" />
         </NavLink>
         <NavLink
           pathname={pathname}
           href="/calendar"
-          className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10`}
+          className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10 text-base`}
           onClick={() => {
             setMobileNavOpen(false);
           }}
         >
-          Calendar <GoArrowRight className="text-xl" />
+          Calendar <MdArrowOutward className="text-xl" />
         </NavLink>
         <NavLink
           pathname={pathname}
           href="/semesters"
-          className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10`}
+          className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10 text-base`}
           onClick={() => {
             setMobileNavOpen(false);
           }}
         >
-          Semesters <GoArrowRight className="text-xl" />
+          Semesters <MdArrowOutward className="text-xl" />
         </NavLink>
         <NavLink
           pathname={pathname}
           href="/classes"
-          className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10`}
+          className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10 text-base`}
           onClick={() => {
             setMobileNavOpen(false);
           }}
         >
-          Classes <GoArrowRight className="text-xl" />
+          Classes <MdArrowOutward className="text-xl" />
         </NavLink>
       </div>
       <div className="p-4 w-full">
