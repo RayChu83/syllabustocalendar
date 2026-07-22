@@ -59,6 +59,27 @@ export default function NavMenu() {
           </NavLink>
           <NavLink
             pathname={pathname}
+            href="/semesters"
+            className="md:block! hidden!"
+          >
+            Semesters
+          </NavLink>
+          <NavLink
+            pathname={pathname}
+            href="/classes"
+            className="md:block! hidden!"
+          >
+            Classes
+          </NavLink>
+          <NavLink
+            pathname={pathname}
+            href="/assignments"
+            className="md:block! hidden!"
+          >
+            Assignments
+          </NavLink>
+          <NavLink
+            pathname={pathname}
             href="/calendar"
             className="md:block! hidden!"
           >
@@ -126,26 +147,6 @@ function MobileNavMenu({
         </NavLink>
         <NavLink
           pathname={pathname}
-          href="/assignments"
-          className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10 text-base`}
-          onClick={() => {
-            setMobileNavOpen(false);
-          }}
-        >
-          Assignments <MdArrowOutward className="text-xl" />
-        </NavLink>
-        <NavLink
-          pathname={pathname}
-          href="/calendar"
-          className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10 text-base`}
-          onClick={() => {
-            setMobileNavOpen(false);
-          }}
-        >
-          Calendar <MdArrowOutward className="text-xl" />
-        </NavLink>
-        <NavLink
-          pathname={pathname}
           href="/semesters"
           className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10 text-base`}
           onClick={() => {
@@ -163,6 +164,26 @@ function MobileNavMenu({
           }}
         >
           Classes <MdArrowOutward className="text-xl" />
+        </NavLink>
+        <NavLink
+          pathname={pathname}
+          href="/assignments"
+          className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10 text-base`}
+          onClick={() => {
+            setMobileNavOpen(false);
+          }}
+        >
+          Assignments <MdArrowOutward className="text-xl" />
+        </NavLink>
+        <NavLink
+          pathname={pathname}
+          href="/calendar"
+          className={`w-full flex items-center justify-between p-4 transition-all duration-300 hover:bg-white/10 active:bg-white/10 text-base`}
+          onClick={() => {
+            setMobileNavOpen(false);
+          }}
+        >
+          Calendar <MdArrowOutward className="text-xl" />
         </NavLink>
       </div>
       <div className="p-4 w-full">

@@ -1,3 +1,4 @@
+import BackButton from "@/components/ui/BackButton";
 import { serverClient } from "@/lib/supabase/server";
 import {
   ArrowLeft,
@@ -284,15 +285,14 @@ export default async function Class({
   });
 
   return (
-    <main className="mx-auto mt-17 flex max-w-320 flex-col gap-8 p-4 sm:p-6">
+    <main className="mx-auto mt-13 flex max-w-320 flex-col gap-8 p-4 sm:p-6">
       <header className="flex flex-col gap-4">
-        <Link
-          href={`/semesters/${semesterId}`}
-          className="flex w-fit items-center gap-2 text-sm font-semibold tracking-tight text-neutral-400 transition-all hover:text-neutral-600"
-        >
-          <ArrowLeft /> <span>Return to Semester</span>
-        </Link>
-
+        <BackButton
+          href={`/semesters`}
+          as="link"
+          text="Back to semesters"
+          cn="mb-4"
+        />
         <section className="overflow-hidden rounded-[2rem] border border-neutral-200 bg-gradient-to-br from-white via-neutral-50 to-stone-100 p-6 shadow-sm sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex max-w-4xl flex-col gap-4">

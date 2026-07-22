@@ -3,6 +3,7 @@ import Link from "next/link";
 import React from "react";
 import { GoArrowLeft } from "react-icons/go";
 import AddClassFormDynamicWrapper from "./_components/AddClassFormDynamicWrapper";
+import BackButton from "@/components/ui/BackButton";
 
 export default async function AddClass({
   params,
@@ -30,14 +31,14 @@ export default async function AddClass({
   if (error) throw Error(error.message);
 
   return (
-    <main className="mt-17 flex flex-col gap-2 max-w-320 mx-auto p-6">
+    <main className="mt-13 flex flex-col gap-2 max-w-320 mx-auto p-6">
       <header className="mb-8 flex flex-col gap-1.5 w-fit">
-        <Link
+        <BackButton
           href={`/semesters/${semesterId}`}
-          className="text-neutral-400 hover:text-neutral-500 flex items-center gap-2 transition-all font-semibold tracking-tight w-fit"
-        >
-          <GoArrowLeft /> <span>Return to Semester</span>
-        </Link>
+          as="link"
+          text="Back to semester"
+          cn="mb-4"
+        />
         <h1 className="sm:text-5xl text-4xl tracking-tight font-black text-neutral-500 mb-4">
           Add your Class
         </h1>

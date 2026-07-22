@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
-import { Stack_Sans_Headline, Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import localFont from "next/font/local";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-
-const stackSansHeadlineFont = Stack_Sans_Headline({ subsets: ["latin"] });
+export const stackSans = localFont({
+  src: "./fonts/StackSans.ttf",
+  variable: "--font-stack-sans",
+  adjustFontFallback: false,
+});
 
 export const metadata: Metadata = {
   title: "Syllabus To Calendar",
@@ -28,8 +30,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", inter.variable)}>
-      <body className={`${stackSansHeadlineFont.className}`} id="portal-root">
+    <html lang="en" className={cn("font-sans", stackSans.variable)}>
+      <body className={`${stackSans.className}`} id="portal-root">
         <TooltipProvider>{children}</TooltipProvider>
         <Toaster position="bottom-right" closeButton />
       </body>

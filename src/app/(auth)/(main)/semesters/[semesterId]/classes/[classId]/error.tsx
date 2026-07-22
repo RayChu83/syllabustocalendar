@@ -13,7 +13,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <main className="mt-17 flex flex-col gap-2 max-w-320 mx-auto p-6">
+    <main className="mt-13 flex flex-col gap-2 max-w-320 mx-auto p-6">
       <h2>Something went wrong!</h2>
       <p>{error.message || "Unexpected error occurred."}</p>
       <button onClick={() => reset()}>Try again</button>

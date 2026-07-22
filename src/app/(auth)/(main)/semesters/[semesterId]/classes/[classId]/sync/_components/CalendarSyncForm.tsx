@@ -519,7 +519,7 @@ ${JSON.stringify(scheduleEvents, null, 2)}
   }
 
   return (
-    <main className="mx-auto mt-17 flex max-w-320 flex-col gap-6 p-4 sm:p-6">
+    <main className="mx-auto mt-13 flex max-w-320 flex-col gap-6 p-4 sm:p-6">
       {isSyncing ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 p-6 backdrop-blur-sm">
           <section

@@ -1,6 +1,10 @@
+import BackButton from "@/components/ui/BackButton";
+import { SemesterWithClasses } from "@/constants";
 import { serverClient } from "@/lib/supabase/server";
-import Link from "next/link";
-import { GoArrowLeft } from "react-icons/go";
+import { formatDate } from "@/lib/utils";
+import { notFound } from "next/navigation";
+import { BiSolidCalendar } from "react-icons/bi";
+import { FaChalkboardTeacher } from "react-icons/fa";
 
 export default async function SemesterDetailed({
   params,
@@ -19,84 +23,51 @@ export default async function SemesterDetailed({
     throw Error("Failed to retrieve user profile");
   }
 
-  const { data: semesterTitle, error: semesterTitleError } = await supabase
+  const { data: semesterData, error: semesterDataError } = await supabase
     .from("semesters")
-    .select("title")
+    .select("*, classes(id, title)")
     .eq("id", semesterId)
-    .single();
+    .maybeSingle();
 
-  if (semesterTitleError) throw Error(semesterTitleError.message);
+  if (semesterDataError) throw Error(semesterDataError.message);
+  if (!semesterData) notFound();
 
-  const { data: classesData, error: classesDataError } = await supabase
-    .from("classes")
-    .select("*")
-    .eq("semester_id", semesterId)
-    .order("created_at", { ascending: true });
-
-  if (classesDataError) throw Error(classesDataError.message);
-
-  const classIds = classesData.map((course) => course.id);
-
-  const { data: deadlinesData, error: deadlinesDataError } = classIds.length
-    ? await supabase
-        .from("deadlines")
-        .select("id,title,due_date,due_time,class_id,created_at")
-        .in("class_id", classIds)
-        .order("due_date", { ascending: true })
-    : { data: [], error: null };
-
-  if (deadlinesDataError) throw Error(deadlinesDataError.message);
-
-  const { data: scheduleData, error: scheduleDataError } = classIds.length
-    ? await supabase
-        .from("schedule")
-        .select(
-          "id,location,start_time,end_time,meeting_days,class_id,created_at",
-        )
-        .in("class_id", classIds)
-        .order("start_time", { ascending: true })
-    : { data: [], error: null };
-
-  if (scheduleDataError) throw Error(scheduleDataError.message);
+  const semester: SemesterWithClasses = {
+    ...semesterData,
+    created_at: new Date(semesterData.created_at),
+  };
 
   return (
-    <main className="mx-auto mt-17 flex max-w-320 flex-col gap-8 p-6">
+    <main className="mx-auto mt-13 flex max-w-7xl flex-col gap-8 p-6">
       <header className="flex flex-col gap-3">
-        <Link
+        <BackButton
           href="/semesters"
-          className="flex w-fit items-center gap-2 font-semibold tracking-tight text-neutral-400 transition-all hover:text-neutral-500"
-        >
-          <GoArrowLeft /> <span>Return to Semesters</span>
-        </Link>
-
-        <div className="flex flex-col gap-4 rounded-3xl bg-neutral-50 p-6 sm:p-8">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-neutral-400">
-                Semester Dashboard
-              </p>
-              <h1 className="text-4xl font-black tracking-tight text-neutral-600 sm:text-5xl">
-                {semesterTitle.title}
-              </h1>
-            </div>
-
-            <Link
-              href={`/semesters/${semesterId}/classes/create`}
-              className="w-fit rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-neutral-700"
-            >
-              Add class
-            </Link>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <p className="rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-medium text-emerald-700">
-              {classesData.length} class{classesData.length !== 1 ? "es" : ""}{" "}
-              enrolled
-            </p>
-            <p className="rounded-full bg-blue-100 px-4 py-1.5 text-sm font-medium text-blue-700">
-              Built from your class syllabus data
+          as="link"
+          text="Back to Semesters"
+          cn="mb-4"
+        />
+        <div className="flex sm:flex-row flex-col sm:items-center justify-between gap-4">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-4xl font-semibold tracking-tight text-neutral-600 sm:text-5xl">
+              {semester.title}
+            </h1>
+            <p className="text-neutral-500 tracking-wide">
+              {semester.grade} • {semester.semester}
             </p>
           </div>
+          <ul className="sm:w-fit w-full overflow-auto flex sm:flex-col flex-row text-nowrap whitespace-nowrap items-end sm:justify-center gap-2 mb-2">
+            <li className="text-neutral-500 tracking-wide flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 text-sm">
+              <FaChalkboardTeacher size={16} />
+              <span>
+                {semester.classes.length} class
+                {semester.classes.length !== 1 ? "es" : ""} enrolled
+              </span>
+            </li>
+            <li className="text-neutral-500 tracking-wide flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 text-sm">
+              <BiSolidCalendar size={16} />
+              Created at {formatDate(semester.created_at)}
+            </li>
+          </ul>
         </div>
       </header>
     </main>

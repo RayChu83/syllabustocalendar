@@ -174,7 +174,10 @@ async function mintGoogleAccessToken(refreshToken: string) {
   return data.access_token;
 }
 
-export async function exchangeGoogleAuthCode(code: string, redirectUri: string) {
+export async function exchangeGoogleAuthCode(
+  code: string,
+  redirectUri: string,
+) {
   const response = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: {

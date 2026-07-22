@@ -7,10 +7,11 @@ import { ArrowLeft, CalendarOff } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import CalendarSyncForm from "./_components/CalendarSyncForm";
+import BackButton from "@/components/ui/BackButton";
 
 function SyncFallback() {
   return (
-    <main className="mx-auto mt-17 flex min-h-[calc(100vh-4.25rem)] max-w-320 items-center justify-center p-6">
+    <main className="mx-auto mt-13 flex min-h-[calc(100vh-4.25rem)] max-w-320 items-center justify-center p-6">
       <section
         className="flex flex-col items-center gap-4 rounded-[2rem] border border-neutral-200 bg-white p-8 text-center shadow-sm"
         aria-live="polite"
@@ -81,7 +82,7 @@ async function SyncReadiness({
 
   if (!googleCalendarConnection?.ok) {
     return (
-      <main className="mx-auto mt-17 flex min-h-[calc(100vh-4.25rem)] max-w-320 items-center justify-center p-6">
+      <main className="mx-auto mt-13 flex min-h-[calc(100vh-4.25rem)] max-w-320 items-center justify-center p-6">
         <section className="flex max-w-xl flex-col gap-5 rounded-[2rem] border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
             <CalendarOff />
@@ -98,13 +99,12 @@ async function SyncReadiness({
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button asChild variant="outline">
-              {" "}
-              <Link href={`/semesters/${semesterId}/classes/${classId}`}>
-                <ArrowLeft data-icon="inline-start" />
-                Return to Class
-              </Link>
-            </Button>
+            <BackButton
+              href={`/semesters/${semesterId}/classes/${classId}`}
+              as="link"
+              text="Back to class"
+              cn="mb-4"
+            />
             <GoogleCalendarConnectButton
               label="Add Google Calendar Connection"
               nextPath={`/semesters/${semesterId}/classes/${classId}/sync`}

@@ -6,6 +6,8 @@ import { BiSolidCalendar } from "react-icons/bi";
 import SemestersList from "./_components/SemestersList";
 import { Suspense } from "react";
 import ClassesList from "./_components/ClassesList";
+import SemestersLoading from "./_components/SemestersLoading";
+import ClassesLoading from "./_components/ClassesLoading";
 
 export default async function Dashboard() {
   const supabase = await serverClient();
@@ -37,10 +39,10 @@ export default async function Dashboard() {
         height={100}
         className="rounded-full sm:size-20 size-15 object-cover mb-4"
       />
-      <header className="flex sm:flex-row flex-col items-start justify-between gap-x-6 gap-y-2 mb-8">
+      <header className="flex sm:flex-row flex-col items-start justify-between gap-x-6 gap-y-2 mb-6">
         <div className="flex items-center justify-center gap-4 w-fit">
           <h1 className="leading-8 flex flex-col">
-            <span className="text-lg text-neutral-500 mb-1">Greetings 👋</span>{" "}
+            <span className="text-lg text-neutral-400 mb-1">Greetings 👋</span>{" "}
             <span className="sm:text-5xl text-4xl text-neutral-700 font-medium tracking-wide">
               {user.user_metadata?.name || user.email}
             </span>
@@ -114,10 +116,10 @@ export default async function Dashboard() {
           <span className="tracking-tight">Sync calendar</span>
         </button>
       </div>
-      <Suspense fallback={<>Loading</>}>
+      <Suspense fallback={<SemestersLoading />}>
         <SemestersList />
       </Suspense>
-      <Suspense fallback={<>Loading</>}>
+      <Suspense fallback={<ClassesLoading />}>
         <ClassesList />
       </Suspense>
     </main>

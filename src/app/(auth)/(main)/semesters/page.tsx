@@ -1,9 +1,7 @@
-import { GoArrowLeft, GoArrowRight } from "react-icons/go";
-import Link from "next/link";
-import SemestersCard from "./_components/SemestersCard";
 import { serverClient } from "@/lib/supabase/server";
 import { SemesterWithClasses } from "@/constants";
-import { IoMdAdd } from "react-icons/io";
+import SemesterList from "./_components/SemesterList";
+import BackButton from "@/components/ui/BackButton";
 
 export default async function Semesters() {
   const supabase = await serverClient();
@@ -19,6 +17,7 @@ export default async function Semesters() {
   const { data: semestersData, error: semestersDataError } = await supabase
     .from("semesters")
     .select("*, classes(id, title)");
+
   const semesters: SemesterWithClasses[] = semestersData
     ? semestersData.map((s) => ({
         ...s,
@@ -30,37 +29,22 @@ export default async function Semesters() {
 
   return (
     <>
-      <main className="mt-17 flex flex-col gap-2 max-w-320 mx-auto p-6">
-        <header className="mb-8 flex flex-col gap-1.5 w-fit">
-          <Link
+      <main className="mt-13 flex flex-col gap-2 max-w-7xl mx-auto p-6">
+        <header className="mb-2 flex flex-col gap-1.5 w-fit">
+          <BackButton
             href="/dashboard"
-            className="text-neutral-400 hover:text-neutral-500 flex items-center gap-2 transition-all font-semibold tracking-tight w-fit"
-          >
-            <GoArrowLeft /> <span>Return to Dashboard</span>
-          </Link>
-          <h1 className="sm:text-5xl text-4xl tracking-tight font-black text-neutral-500 mb-4">
-            Your Semesters:
+            as="link"
+            cn="mb-4"
+            text="Back to Dashboard"
+          />
+          <h1 className="sm:text-5xl text-4xl tracking-tight font-black text-neutral-700 mb-1">
+            My semesters:
           </h1>
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="text-sm text-emerald-700 outline outline-emerald-200 w-fit px-4 py-1.5 rounded-full bg-emerald-100 drop-shadow-2xl drop-shadow-emerald-100 flex items-center justify-center gap-1.5 hover:brightness-95 transition-all duration-300">
-              <span>📚</span>
-              {semesters.length} semesters
-            </div>
-            <button className="text-sm text-purple-700 outline outline-purple-200 w-fit cursor-pointer px-4 py-1.5 rounded-full bg-purple-100 drop-shadow-2xl drop-shadow-purple-100 flex items-center justify-center gap-2 hover:brightness-95 transition-all duration-300">
-              <span>✨</span>
-              <span>Powered by Advyna AI</span>
-            </button>
-          </div>
+          <p className="text-neutral-500">
+            Organize your classes into semesters.
+          </p>
         </header>
-        <div className="grid 2xl:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-6">
-          <SemestersCard semesters={semesters} />
-          <Link href="/semesters/add">
-            <div className="text-sm text-blue-500 w-full h-full outline-1 outline-dashed outline-blue-300 p-6 rounded-2xl bg-blue-100 flex flex-col items-center justify-center gap-2 hover:brightness-95 transition-all duration-300">
-              <IoMdAdd className="text-6xl" />
-              <span>New Semester</span>
-            </div>
-          </Link>
-        </div>
+        <SemesterList semesters={semesters} />
       </main>
     </>
   );
